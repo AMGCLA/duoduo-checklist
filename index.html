@@ -260,7 +260,7 @@ body.dark .category-card .section-head{background:linear-gradient(100deg,color-m
 @media(prefers-reduced-motion:reduce){#ddChecklistBgmFrame{transition:none;}}
 </style>
 <script data-goatcounter="https://duoduovalley.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
-<link rel="stylesheet" href="cursor-ui/cursor.css">
+<link rel="stylesheet" href="cursor-ui/cursor.css?v=20261105-scrollglove">
 </head>
 <body>
 <div class="wrap">
@@ -1496,7 +1496,7 @@ render();
   // checklist DOM is dynamically updated. Ignore live task states and BGM data.
   function sourceParts(doc){
     const scripts=Array.from(doc.querySelectorAll('script'))
-      .filter(el=>!el.getAttribute('src')||el.getAttribute('src')==='cursor-ui/cursor.js')
+      .filter(el=>!el.getAttribute('src')||el.getAttribute('src')?.split('?')[0]==='cursor-ui/cursor.js')
       .map(el=>
       [el.getAttribute('src')||'',el.getAttribute('type')||'',el.textContent||''].join('\u0000'));
     const styles=Array.from(doc.querySelectorAll('style')).map(el=>el.textContent||'');
@@ -1585,7 +1585,7 @@ document.addEventListener('visibilitychange',()=>{
 });
 </script>
 
-<script src="cursor-ui/cursor.js" defer></script>
+<script src="cursor-ui/cursor.js?v=20261105-scrollglove" defer></script>
 
 <script>
 // Checklist BGM bridge: resize only the player canvas and show the cover

@@ -23,3 +23,32 @@
   html.duoduo-cursor-ready [contenteditable],
   html.duoduo-cursor-ready [contenteditable] * { cursor: text !important; }
 }
+
+
+/* Checklist scroll glove: shared 500ms blink, quick return on scrollend. */
+@media (hover: hover) and (pointer: fine) {
+  html.duoduo-cursor-ready.duoduo-cursor-scroll,
+  html.duoduo-cursor-ready.duoduo-cursor-scroll * {
+    cursor: url('cursor-scroll-1.png') 20 8, ns-resize !important;
+  }
+  html.duoduo-cursor-ready.duoduo-cursor-scroll-alt,
+  html.duoduo-cursor-ready.duoduo-cursor-scroll-alt * {
+    cursor: url('cursor-scroll-2.png') 20 8, ns-resize !important;
+  }
+  /* Best effort: native scrollbar cursor may be controlled by browser. */
+  html.duoduo-cursor-ready::-webkit-scrollbar-thumb {
+    cursor: url('cursor-scroll-1.png') 20 8, ns-resize;
+  }
+  html.duoduo-cursor-ready.duoduo-cursor-scroll-alt::-webkit-scrollbar-thumb {
+    cursor: url('cursor-scroll-2.png') 20 8, ns-resize;
+  }
+  /* Never change caret into a glove inside editable controls. */
+  html.duoduo-cursor-ready.duoduo-cursor-scroll input:not([type=button]):not([type=submit]):not([type=reset]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]),
+  html.duoduo-cursor-ready.duoduo-cursor-scroll-alt input:not([type=button]):not([type=submit]):not([type=reset]):not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]),
+  html.duoduo-cursor-ready.duoduo-cursor-scroll textarea,
+  html.duoduo-cursor-ready.duoduo-cursor-scroll-alt textarea,
+  html.duoduo-cursor-ready.duoduo-cursor-scroll [contenteditable],
+  html.duoduo-cursor-ready.duoduo-cursor-scroll-alt [contenteditable] {
+    cursor: text !important;
+  }
+}
