@@ -2,7 +2,12 @@
 <html lang="zh-Hant">
       <link rel="icon" type="image/png" href="Logo2.PNG">
 <head>
-<style id="ddChecklistGuideEmbeddedPlayerHide">html.dd-checklist-inside-guide #ddChecklistBgmFrame,html.dd-checklist-inside-guide #ddChecklistCoverDialog{display:none!important;}</style>
+<style id="ddChecklistGuideEmbeddedPlayerHide">html.dd-checklist-inside-guide #ddChecklistBgmFrame,html.dd-checklist-inside-guide #ddChecklistCoverDialog{display:none!important;}
+/* Checklist backup controls: additive only; existing task layout stays unchanged. */
+.dd-checklist-backup-status{font-size:12px;color:var(--muted);line-height:1.5;margin:6px 0 0;min-height:0}
+.dd-checklist-backup-status:empty{display:none}
+.dd-checklist-backup-status[data-error="1"]{color:#ba4242}
+</style>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>多多谷｜每日 Checklist</title>
@@ -275,10 +280,15 @@ body.dark .category-card .section-head{background:linear-gradient(100deg,color-m
     <div class="controls">
       <button class="control-btn" id="expandAll">⭐ 全部展開</button>
       <button class="control-btn" id="collapseAll">⭐ 全部收起</button>
+      <button class="control-btn" id="ddChecklistBackupExport" type="button" title="將目前裝置的 Checklist 紀錄備份為 JSON 檔案">💾 備份進度</button>
+      <button class="control-btn" id="ddChecklistBackupImport" type="button" title="從先前下載的 Checklist 備份檔還原">📂 還原進度</button>
+      <button class="control-btn" id="ddChecklistBackupUndo" type="button" hidden title="復原上次匯入前的本機進度">↩ 撤銷上次還原</button>
+      <input type="file" id="ddChecklistBackupFile" accept=".json,application/json" hidden aria-label="選擇 Checklist 備份 JSON">
       <a class="official-btn" href="https://duoduovalley.github.io/duoduo-website/" target="_blank" rel="noopener noreferrer">🌐 官方網站</a>
       <a class="guide-btn" href="https://docs.google.com/document/d/13Ok02E9A_sS7LWrrFXw4S9jsPU6JWdTu6INpwuMlDdo/edit?tab=t.0#heading=h.abq713skdil9" target="_blank" rel="noopener">📖 遊玩指南</a>
       <button class="notify-btn" id="notifyBtn" type="button">🔔 開啟活動提醒</button>
     </div>
+    <div class="dd-checklist-backup-status" id="ddChecklistBackupStatus" role="status" aria-live="polite"></div>
     <div class="search-row">
       <input class="search-input" id="taskSearch" type="search" placeholder="🔍 搜尋任務，例如：每日簽到、復古炎魔祭壇、燦爛的凶星">
       <button class="favorite-filter" id="favoriteFilter" type="button">⭐ 只看最愛</button>
@@ -617,8 +627,51 @@ let weekKey = monday.toLocaleDateString("sv-SE");
 document.getElementById("today").textContent =
   `${now.getFullYear()} / ${String(now.getMonth()+1).padStart(2,"0")} / ${String(now.getDate()).padStart(2,"0")}（${weekdays[now.getDay()]}）`;
 
-let daily = JSON.parse(localStorage.getItem("dodogu_daily_"+todayKey) || "{}");
-let weekly = JSON.parse(localStorage.getItem("dodogu_weekly_"+weekKey) || "{}");
+// Checklist local-state guard: keep the existing keys and task behavior intact.
+// Backups live in the same browser origin; they are NOT cloud/independent backups.
+const CHECKLIST_GUARD_BACKUP_PREFIX="dodogu_guard_backup_v1:";
+function parseChecklistRecord(raw){
+  if(raw===null)return null;
+  try{
+    const value=JSON.parse(raw);
+    return value && typeof value==="object" && !Array.isArray(value) ? value : null;
+  }catch(_){return null;}
+}
+function readChecklistRecord(key){
+  let raw=null;
+  try{raw=localStorage.getItem(key);}catch(error){
+    console.warn("Checklist 瀏覽器儲存空間無法讀取",error?.name||"error");
+    return {};
+  }
+  const value=parseChecklistRecord(raw);
+  if(value!==null){
+    // Seed/refresh a known-good copy for current existing data on first read.
+    try{
+      const backupKey=CHECKLIST_GUARD_BACKUP_PREFIX+key;
+      if(localStorage.getItem(backupKey)!==raw)localStorage.setItem(backupKey,raw);
+    }catch(_){/* A backup write failure must not interrupt normal task use. */}
+    return value;
+  }
+  try{
+    const recovered=parseChecklistRecord(localStorage.getItem(CHECKLIST_GUARD_BACKUP_PREFIX+key));
+    if(recovered!==null){
+      console.warn("Checklist 紀錄異常，已使用本機備援資料",key);
+      return recovered;
+    }
+  }catch(_){/* Continue with a safe in-memory empty record. */}
+  if(raw!==null)console.warn("Checklist 紀錄格式異常，已保留原始紀錄",key);
+  return {};
+}
+function writeChecklistRecord(key,value){
+  const serialized=JSON.stringify(value);
+  localStorage.setItem(key,serialized);
+  // Only mirror an already successful primary write. Never delete old records.
+  try{localStorage.setItem(CHECKLIST_GUARD_BACKUP_PREFIX+key,serialized);}
+  catch(_){/* Keep normal checklist behavior if quota is exhausted. */}
+}
+
+let daily = readChecklistRecord("dodogu_daily_"+todayKey);
+let weekly = readChecklistRecord("dodogu_weekly_"+weekKey);
 
 // V37：任務改為穩定 ID，避免分類／排序調整後造成既有勾選與最愛狀態錯位。
 function taskId(type,name){ return type+"::"+name; }
@@ -680,16 +733,16 @@ function migrateV38Storage(){
 
   Object.keys(localStorage).forEach(key=>{
     if(key.startsWith("dodogu_daily_")){
-      try{ localStorage.setItem(key,JSON.stringify(migrateStore(JSON.parse(localStorage.getItem(key)||"{}"),"daily"))); }catch(e){}
+      try{ const old=parseChecklistRecord(localStorage.getItem(key)); if(old!==null)writeChecklistRecord(key,migrateStore(old,"daily")); }catch(e){}
     }
     if(key.startsWith("dodogu_weekly_")){
-      try{ localStorage.setItem(key,JSON.stringify(migrateStore(JSON.parse(localStorage.getItem(key)||"{}"),"weekly"))); }catch(e){}
+      try{ const old=parseChecklistRecord(localStorage.getItem(key)); if(old!==null)writeChecklistRecord(key,migrateStore(old,"weekly")); }catch(e){}
     }
   });
-  daily=JSON.parse(localStorage.getItem("dodogu_daily_"+todayKey) || "{}");
-  weekly=JSON.parse(localStorage.getItem("dodogu_weekly_"+weekKey) || "{}");
+  daily=readChecklistRecord("dodogu_daily_"+todayKey);
+  weekly=readChecklistRecord("dodogu_weekly_"+weekKey);
 
-  const favorites=JSON.parse(localStorage.getItem("dodogu_checklist_favorites")||"{}");
+  const favorites=readChecklistRecord("dodogu_checklist_favorites");
   const favNext={};
   Object.keys(favorites).forEach(k=>{
     if(k.includes("::")){
@@ -706,7 +759,7 @@ function migrateV38Storage(){
     if(name) name=normalizeName(name);
     if(type && name && favorites[k]) favNext[taskId(type,name)]=true;
   });
-  localStorage.setItem("dodogu_checklist_favorites",JSON.stringify(favNext));
+  writeChecklistRecord("dodogu_checklist_favorites",favNext);
 
   // V37 已經把 BOSS 合併成單一「每日 BOSS」分類；V38 只新增／調整子分類內容，不改收合邏輯。
   localStorage.setItem(flag,"1");
@@ -738,14 +791,14 @@ const ADVENTURE_ACHIEVEMENTS = [
 function loadAdventureProfile(){
   const defaults={xp:0,totalCompletions:0,bossCompletions:0,activeDays:{},perfectDays:{},rewardedTasks:{},claimedChallenges:{},challengeCompletions:0,unlockedAchievements:{}};
   try{
-    const saved=JSON.parse(localStorage.getItem(ADVENTURE_PROFILE_KEY)||"{}");
+    const saved=readChecklistRecord(ADVENTURE_PROFILE_KEY);
     return {...defaults,...saved,
       activeDays:saved.activeDays||{},perfectDays:saved.perfectDays||{},rewardedTasks:saved.rewardedTasks||{},
       claimedChallenges:saved.claimedChallenges||{},unlockedAchievements:saved.unlockedAchievements||{}};
   }catch(e){return defaults;}
 }
 let adventureProfile=loadAdventureProfile();
-function saveAdventureProfile(){localStorage.setItem(ADVENTURE_PROFILE_KEY,JSON.stringify(adventureProfile));}
+function saveAdventureProfile(){writeChecklistRecord(ADVENTURE_PROFILE_KEY,adventureProfile);}
 function recordAdventureTaskCompletion(type,id){
   const period=type==="weekly"?"w:"+weekKey:"d:"+todayKey;
   if(!Array.isArray(adventureProfile.rewardedTasks[period])) adventureProfile.rewardedTasks[period]=[];
@@ -992,10 +1045,10 @@ async function copyPromo(type,button){
 const FOLD_KEY = "dodogu_checklist_folds";
 const THEME_KEY = "dodogu_checklist_theme";
 
-let foldState = JSON.parse(localStorage.getItem(FOLD_KEY) || "{}");
+let foldState = readChecklistRecord(FOLD_KEY);
 if(localStorage.getItem(THEME_KEY)==="dark") document.body.classList.add("dark");
 
-function saveFolds(){ localStorage.setItem(FOLD_KEY, JSON.stringify(foldState)); }
+function saveFolds(){ writeChecklistRecord(FOLD_KEY,foldState); }
 function setAllSections(closed){
   // 統一控制所有可折疊區塊：一般分類 + 昨日漏掉 + 每日活動提醒 + 我的最愛
   sections.forEach((_,i)=>foldState[i]=closed);
@@ -1067,12 +1120,12 @@ function render(){
   let dailyDone=0,dailyTotal=0,weeklyDone=0,weeklyTotal=0,remaining=[];
   const query=(document.getElementById("taskSearch")?.value||"").trim().toLowerCase();
   const onlyFavorites=localStorage.getItem("dodogu_favorite_filter")==="1";
-  const favorites=JSON.parse(localStorage.getItem("dodogu_checklist_favorites")||"{}");
+  const favorites=readChecklistRecord("dodogu_checklist_favorites");
 
   // 昨日漏掉的每日任務（只做提醒，不會影響今天完成度）
   const yDate=new Date(now); yDate.setDate(yDate.getDate()-1);
   const yKey=yDate.toLocaleDateString("sv-SE");
-  const yStore=JSON.parse(localStorage.getItem("dodogu_daily_"+yKey)||"{}");
+  const yStore=readChecklistRecord("dodogu_daily_"+yKey);
   const yDay=yDate.getDay();
   const yesterdayMissed=[];
   sections.forEach((section,si)=>{
@@ -1136,7 +1189,7 @@ function render(){
           const store=x.type==="weekly" ? weekly : daily;
           const storageKey=x.type==="weekly" ? "dodogu_weekly_"+weekKey : "dodogu_daily_"+todayKey;
           const nextChecked=!store[x.id];if(nextChecked)recordAdventureTaskCompletion(x.type,x.id);store[x.id]=nextChecked;
-          localStorage.setItem(storageKey,JSON.stringify(store));
+          writeChecklistRecord(storageKey,store);
           render();
       };
       return el;
@@ -1287,7 +1340,7 @@ function render(){
     head.innerHTML=`<span class="section-title">${title}</span><span class="summary">${doneInSection} / ${totalInSection}</span><button class="select-all-btn" type="button">${allChecked?"↩ 全部取消":"☑ 全選"}</button><button class="arrow category-toggle" type="button" aria-label="展開或收起${title}" aria-expanded="${!foldState[sectionIndex]}">⌄</button>`;
     addSectionTitleIcon(head.querySelector(".section-title"), title);
     const selectAllBtn=head.querySelector(".select-all-btn");
-    selectAllBtn.onclick=(e)=>{e.stopPropagation();items.forEach(([name,daysText,days],li)=>{const available=!days||days.includes(now.getDay());if(available){const id=taskId(type,name);if(!allChecked&&!store[id])recordAdventureTaskCompletion(type,id);store[id]=!allChecked;}});localStorage.setItem(storageKey,JSON.stringify(store));render();};
+    selectAllBtn.onclick=(e)=>{e.stopPropagation();items.forEach(([name,daysText,days],li)=>{const available=!days||days.includes(now.getDay());if(available){const id=taskId(type,name);if(!allChecked&&!store[id])recordAdventureTaskCompletion(type,id);store[id]=!allChecked;}});writeChecklistRecord(storageKey,store);render();};
     const body=document.createElement("div");body.className="items";
     const appendTaskRow=({name,daysText,days,id,dayStyle})=>{
       const available=!days||days.includes(now.getDay()); const checked=!!store[id]; const isFav=!!favorites[id];
@@ -1295,8 +1348,8 @@ function render(){
       const row=document.createElement("div");row.className="item"+(uiIconFile?" has-ui-icon":"")+(checked?" done":"")+(!available?" disabled":"")+(checked&&pendingCompletionAnimationId===id?" just-completed":"");
       row.innerHTML=`<div class="box">${checked?"✓":""}</div>${uiIconFile?`<span class="task-ui-icon"><img src="${UI_ICON_BASE+uiIconFile}" alt="" loading="lazy" decoding="async"></span>`:""}<div class="name">${name}</div>${daysText?`<div class="day ${dayStyle||""}">${daysText}</div>`:""}<div class="item-actions"><button class="favorite-btn ${isFav?"active":""}" type="button" title="${isFav?"取消最愛":"加入最愛／置頂"}">${isFav?"★":"☆"}</button></div>`;
       const favBtn=row.querySelector(".favorite-btn");
-      favBtn.onclick=(e)=>{e.stopPropagation();favorites[id]=!favorites[id];if(!favorites[id])delete favorites[id];localStorage.setItem("dodogu_checklist_favorites",JSON.stringify(favorites));render();};
-      if(available) row.onclick=()=>{const nextChecked=!store[id];pendingCompletionAnimationId=nextChecked?id:null;if(nextChecked)recordAdventureTaskCompletion(type,id);store[id]=nextChecked;localStorage.setItem(storageKey,JSON.stringify(store));render();pendingCompletionAnimationId=null;};
+      favBtn.onclick=(e)=>{e.stopPropagation();favorites[id]=!favorites[id];if(!favorites[id])delete favorites[id];writeChecklistRecord("dodogu_checklist_favorites",favorites);render();};
+      if(available) row.onclick=()=>{const nextChecked=!store[id];pendingCompletionAnimationId=nextChecked?id:null;if(nextChecked)recordAdventureTaskCompletion(type,id);store[id]=nextChecked;writeChecklistRecord(storageKey,store);render();pendingCompletionAnimationId=null;};
       return row;
     };
     const appendBossTaskRow=(x)=>{
@@ -1304,8 +1357,8 @@ function render(){
       const imgPath=BOSS_IMAGE_MAP[base],difficultyPath=BOSS_DIFFICULTY_IMAGE_MAP[difficulty];
       const row=document.createElement("div");row.className="item boss-item"+(checked?" done":"")+(checked&&pendingCompletionAnimationId===x.id?" just-completed":"");
       row.innerHTML=`<div class="box">${checked?"✓":""}</div><img class="boss-image" src="${imgPath}" alt="${base}" title="${base}" loading="lazy"><img class="boss-difficulty-image" src="${difficultyPath}" alt="${difficulty}" title="${difficulty}" loading="lazy"><div class="item-actions"><button class="favorite-btn ${isFav?"active":""}" type="button" title="${isFav?"取消最愛":"加入最愛／置頂"}">${isFav?"★":"☆"}</button></div>`;
-      row.querySelector(".favorite-btn").onclick=(e)=>{e.stopPropagation();favorites[x.id]=!favorites[x.id];if(!favorites[x.id])delete favorites[x.id];localStorage.setItem("dodogu_checklist_favorites",JSON.stringify(favorites));render();};
-      row.onclick=()=>{const nextChecked=!store[x.id];pendingCompletionAnimationId=nextChecked?x.id:null;if(nextChecked)recordAdventureTaskCompletion(x.type,x.id);store[x.id]=nextChecked;localStorage.setItem(storageKey,JSON.stringify(store));render();pendingCompletionAnimationId=null;};
+      row.querySelector(".favorite-btn").onclick=(e)=>{e.stopPropagation();favorites[x.id]=!favorites[x.id];if(!favorites[x.id])delete favorites[x.id];writeChecklistRecord("dodogu_checklist_favorites",favorites);render();};
+      row.onclick=()=>{const nextChecked=!store[x.id];pendingCompletionAnimationId=nextChecked?x.id:null;if(nextChecked)recordAdventureTaskCompletion(x.type,x.id);store[x.id]=nextChecked;writeChecklistRecord(storageKey,store);render();pendingCompletionAnimationId=null;};
       return row;
     };
     if(title==="每日 BOSS" || title==="每週任務"){
@@ -1416,12 +1469,12 @@ function checkActivityNotify(){
   if(localStorage.getItem(NOTIFY_KEY)!=="1" || !window.Notification || Notification.permission!=="granted") return;
   const d=new Date(), hm=String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
   const day=d.toLocaleDateString("sv-SE");
-  const sent=JSON.parse(localStorage.getItem(NOTIFY_SENT_KEY)||"{}");
+  const sent=readChecklistRecord(NOTIFY_SENT_KEY);
   ACTIVITY_SCHEDULES.forEach(x=>{
     if(!x.times.includes(hm)) return;
     const key=day+"_"+x.name+"_"+hm;
     if(sent[key]) return;
-    sent[key]=1; localStorage.setItem(NOTIFY_SENT_KEY,JSON.stringify(sent));
+    sent[key]=1; writeChecklistRecord(NOTIFY_SENT_KEY,sent);
     const body=x.name==="世界秘寶"?"世界秘寶現在開始！快根據線索尋找秘寶蹤跡 🎁":"流浪商人現在出現！快前往各村莊、城鎮看看吧 🧳";
     new Notification("🔔 多多谷活動提醒",{body});
     notifyToast("🔔 "+x.name+" 開始了！");
@@ -1571,8 +1624,8 @@ function checkChecklistDateRollover(){
   now=current;
   todayKey=nextDay;
   weekKey=nextWeek;
-  daily=JSON.parse(localStorage.getItem('dodogu_daily_'+todayKey)||'{}');
-  weekly=JSON.parse(localStorage.getItem('dodogu_weekly_'+weekKey)||'{}');
+  daily=readChecklistRecord('dodogu_daily_'+todayKey);
+  weekly=readChecklistRecord('dodogu_weekly_'+weekKey);
   document.getElementById('today').textContent=
     `${now.getFullYear()} / ${String(now.getMonth()+1).padStart(2,'0')} / ${String(now.getDate()).padStart(2,'0')}（${weekdays[now.getDay()]}）`;
   render();
@@ -1583,6 +1636,201 @@ window.addEventListener('pageshow',checkChecklistDateRollover);
 document.addEventListener('visibilitychange',()=>{
   if(!document.hidden)checkChecklistDateRollover();
 });
+// Checklist backup/restore — local browser only, never uploads player progress.
+(function(){
+  'use strict';
+  const FORMAT='duoduo-checklist-local-backup';
+  const VERSION=1;
+  const ROLLBACK_KEY='dodogu_guard_last_import_rollback_v1';
+  const OBJECT_KEYS=new Set(['dodogu_checklist_favorites','dodogu_adventure_profile_v1','dodogu_checklist_folds','dodogu_activity_notify_sent']);
+  const SIMPLE_KEYS=new Set([
+    'dodogu_daily_boss_active_group','dodogu_weekly_boss_active_group',
+    'dodogu_checklist_theme','dodogu_yesterday_closed','dodogu_reminder_closed',
+    'dodogu_favorites_closed','dodogu_adventure_collapsed',
+    'dodogu_adventure_achievements_open','dodogu_activity_notify',
+    'dodogu_favorite_filter','dodogu_checklist_v38_migrated'
+  ]);
+  const status=document.getElementById('ddChecklistBackupStatus');
+  const fileInput=document.getElementById('ddChecklistBackupFile');
+  const undoButton=document.getElementById('ddChecklistBackupUndo');
+  function notify(message,error=false){status.textContent=message;status.dataset.error=error?'1':'0';}
+  function validDate(text){
+    if(!/^20\d\d-\d\d-\d\d$/.test(text))return false;
+    const date=new Date(text+'T00:00:00Z');
+    return Number.isFinite(date.getTime())&&date.toISOString().slice(0,10)===text;
+  }
+  function isObjectKey(key){
+    return OBJECT_KEYS.has(key)||
+      (key.startsWith('dodogu_daily_')&&validDate(key.slice(13)))||
+      (key.startsWith('dodogu_weekly_')&&validDate(key.slice(14)));
+  }
+  function allowedKey(key){return isObjectKey(key)||SIMPLE_KEYS.has(key);}
+  function validateAdventureProfile(profile){
+    const numeric=new Set(['xp','totalCompletions','bossCompletions','challengeCompletions']);
+    const maps=new Set(['activeDays','perfectDays','rewardedTasks','claimedChallenges','unlockedAchievements']);
+    for(const [key,value] of Object.entries(profile)){
+      if(numeric.has(key)){
+        if(typeof value!=='number'||!Number.isSafeInteger(value)||value<0||value>1000000000)
+          throw Error('冒險數值格式錯誤：'+key);
+      }else if(maps.has(key)){
+        if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length>5000)
+          throw Error('冒險紀錄格式錯誤：'+key);
+        for(const [entry,v] of Object.entries(value)){
+          if(entry.length>250)throw Error('冒險紀錄名稱過長');
+          if(key==='rewardedTasks'){
+            if(!Array.isArray(v)||v.length>600||v.some(id=>typeof id!=='string'||id.length>250))
+              throw Error('冒險任務獎勵紀錄格式錯誤');
+          }else if(key==='unlockedAchievements'){
+            if(typeof v!=='string'||v.length>40)throw Error('冒險成就日期格式錯誤');
+          }else if(v!==true&&v!==false)throw Error('冒險進度格式錯誤');
+        }
+      }else throw Error('冒險紀錄含有未知欄位：'+key);
+    }
+  }
+  function validateValue(key,value){
+    if(typeof value!=='string'||value.length>350000)throw Error('檔案資料型態或長度不符');
+    if(isObjectKey(key)){
+      const parsed=parseChecklistRecord(value);
+      if(parsed===null)throw Error('備份含有無效的進度資料：'+key);
+      if(key==='dodogu_adventure_profile_v1')validateAdventureProfile(parsed);
+    }else if(key==='dodogu_checklist_theme'){
+      if(value!=='light'&&value!=='dark')throw Error('備份主題資料無效');
+    }else if(key.endsWith('boss_active_group')){
+      if(value.length>150)throw Error('備份 BOSS 分類資料過長');
+    }else if(value!=='0'&&value!=='1')throw Error('備份設定格式不符：'+key);
+  }
+  function listKeys(){
+    const list=[];
+    for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);
+      if(key&&allowedKey(key))list.push(key);
+    }
+    return list.sort();
+  }
+  function exportRecords(){
+    const records=Object.create(null);
+    for(const key of listKeys()){
+      let raw=localStorage.getItem(key);
+      if(isObjectKey(key)&&parseChecklistRecord(raw)===null){
+        // Use a valid V1 safety copy, but never overwrite a damaged original here.
+        const backup=localStorage.getItem(CHECKLIST_GUARD_BACKUP_PREFIX+key);
+        if(parseChecklistRecord(backup)===null)throw Error('本機紀錄有損毀且沒有可用備援：'+key);
+        raw=backup;
+      }
+      validateValue(key,raw);
+      records[key]=raw;
+    }
+    return records;
+  }
+  function updateUndo(){
+    try{
+      const value=localStorage.getItem(ROLLBACK_KEY);
+      undoButton.hidden=!value;
+    }catch(_){undoButton.hidden=true;}
+  }
+  function saveDownload(content){
+    const blob=new Blob([content],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    const date=new Date();
+    const stamp=[date.getFullYear(),String(date.getMonth()+1).padStart(2,'0'),String(date.getDate()).padStart(2,'0')].join('')+'_'+[date.getHours(),date.getMinutes(),date.getSeconds()].map(x=>String(x).padStart(2,'0')).join('');
+    a.download='DuoDuo_Checklist_Backup_'+stamp+'.json';
+    document.body.appendChild(a);
+    a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+  }
+  document.getElementById('ddChecklistBackupExport').addEventListener('click',()=>{
+    try{
+      const records=exportRecords();
+      const content=JSON.stringify({format:FORMAT,version:VERSION,exportedAt:new Date().toISOString(),records},null,2);
+      saveDownload(content);
+      notify('已建立 '+Object.keys(records).length+' 筆本機紀錄備份。請自行妥善保管 JSON 檔案。');
+    }catch(error){notify('備份失敗：'+String(error.message||error),true);}
+  });
+  document.getElementById('ddChecklistBackupImport').addEventListener('click',()=>fileInput.click());
+  function checkImport(text){
+    if(text.length>1900000)throw Error('備份檔案過大');
+    const doc=JSON.parse(text);
+    if(!doc||doc.format!==FORMAT||doc.version!==VERSION||
+       !doc.records||typeof doc.records!=='object'||Array.isArray(doc.records))
+      throw Error('這不是有效的多多谷 Checklist 備份檔案');
+    const keys=Object.keys(doc.records);
+    if(keys.length===0||keys.length>1500)throw Error('備份紀錄數量異常');
+    for(const key of keys){
+      if(!allowedKey(key))throw Error('備份包含不允許的資料欄位：'+key);
+      validateValue(key,doc.records[key]);
+    }
+    return {keys,records:doc.records};
+  }
+  function rollbackSnapshot(keys){
+    const before=[];
+    for(const key of keys){
+      before.push([key,localStorage.getItem(key)]);
+      if(isObjectKey(key)){
+        const backup=CHECKLIST_GUARD_BACKUP_PREFIX+key;
+        before.push([backup,localStorage.getItem(backup)]);
+      }
+    }
+    return {format:'duoduo-checklist-restore-rollback-v1',createdAt:new Date().toISOString(),before};
+  }
+  function applySnapshot(snapshot){
+    if(snapshot?.format!=='duoduo-checklist-restore-rollback-v1'||!Array.isArray(snapshot.before))
+      throw Error('無效的復原記錄');
+    for(const pair of snapshot.before){
+      if(!Array.isArray(pair)||pair.length!==2||typeof pair[0]!=='string'||
+         !(allowedKey(pair[0]) || (pair[0].startsWith(CHECKLIST_GUARD_BACKUP_PREFIX)&&allowedKey(pair[0].slice(CHECKLIST_GUARD_BACKUP_PREFIX.length)))) ||
+         (pair[1]!==null&&typeof pair[1]!=='string'))throw Error('復原記錄格式錯誤');
+    }
+    // Remove inserted keys before restoring old values to reduce quota pressure.
+    for(const [key,value] of snapshot.before)if(value===null)localStorage.removeItem(key);
+    for(const [key,value] of snapshot.before)if(value!==null)localStorage.setItem(key,value);
+  }
+  fileInput.addEventListener('change',async()=>{
+    const file=fileInput.files?.[0];
+    fileInput.value='';
+    if(!file)return;
+    try{
+      if(file.size>1900000)throw Error('備份檔超過 1.9 MB 上限');
+      const {keys,records}=checkImport(await file.text());
+      const overlaps=keys.filter(key=>localStorage.getItem(key)!==null).length;
+      if(!confirm('這份備份包含 '+keys.length+' 筆紀錄，其中 '+overlaps+' 筆與本機資料重複。\n\n還原會更新重複紀錄；沒有出現在備份內的資料會保留。\n系統將先建立本機復原點。確定繼續？'))return;
+      const snapshot=rollbackSnapshot(keys);
+      // No imported value is written before a recoverable snapshot is saved.
+      localStorage.setItem(ROLLBACK_KEY,JSON.stringify(snapshot));
+      try{
+        for(const key of keys){
+          if(isObjectKey(key))writeChecklistRecord(key,JSON.parse(records[key]));
+          else localStorage.setItem(key,records[key]);
+        }
+      }catch(error){
+        try{applySnapshot(snapshot);}catch(rollbackError){
+          notify('還原未完成，且自動回復遇到錯誤；請勿清除網站資料，使用「撤銷上次還原」重試。',true);
+          updateUndo();return;
+        }
+        notify('還原未完成，原本資料已回復：'+String(error.message||error),true);
+        updateUndo();return;
+      }
+      notify('已還原 '+keys.length+' 筆紀錄，重新整理後生效。可使用「撤銷上次還原」復原原資料。');
+      updateUndo();
+      location.reload();
+    }catch(error){notify('無法還原：'+String(error.message||error),true);}
+  });
+  undoButton.addEventListener('click',()=>{
+    try{
+      const snapshot=JSON.parse(localStorage.getItem(ROLLBACK_KEY)||'null');
+      if(!snapshot)throw Error('沒有可用的復原記錄');
+      if(!confirm('確定撤銷上次備份還原，恢復匯入前的本機紀錄？'))return;
+      applySnapshot(snapshot);
+      localStorage.removeItem(ROLLBACK_KEY);
+      notify('已復原上次匯入前的資料，重新整理後生效。');
+      updateUndo();
+      location.reload();
+    }catch(error){notify('撤銷失敗：'+String(error.message||error),true);}
+  });
+  updateUndo();
+  // Export helpers only for isolated verification, not a public API.
+})();
 </script>
 
 <script src="cursor-ui/cursor.js?v=20261105-scrollglove" defer></script>
