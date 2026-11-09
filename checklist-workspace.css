@@ -178,15 +178,47 @@ body.dd-workspace.dark .adventure-card { border-color:var(--line); background:va
 .dd-workspace .dd-promo-disclosure .promo-wrap { border:0; margin:0; border-radius:0; padding:10px; }
 .dd-workspace .copy-btn, .dd-workspace .promo-link { min-height:44px; }
 .dd-workspace .promo-text { max-height:260px; }
-.dd-page-footer { margin:22px 0 0 250px; color:var(--muted); }
-.dd-page-footer .reset, .dd-page-footer .note { font-size:11px; text-align:left; }
-.dd-page-footer .analytics-row { justify-content:flex-start; padding:8px 0; font-size:11px; margin-top:5px; }
+/* Status and explanatory panel share one row and the same top/bottom edges. */
+.dd-overview-row {
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:14px; align-items:stretch; margin-top:12px;
+}
+.dd-overview-left, .dd-overview-info {
+  min-width:0; border:1px solid var(--line); border-radius:14px;
+  background:var(--card); padding:13px 15px;
+}
+.dd-overview-left { display:flex; flex-direction:column; justify-content:space-between; gap:10px; }
+.dd-workspace .dd-overview-left .remaining {
+  margin:0; padding:3px 0; background:transparent;
+  color:var(--text); font-size:14px; line-height:1.55; font-weight:650;
+}
+.dd-workspace .dd-overview-left .dd-quick-links { margin:0; gap:8px; }
+.dd-workspace .dd-overview-info {
+  display:flex; flex-direction:column; justify-content:center; gap:7px;
+  color:var(--text);
+}
+.dd-workspace .dd-overview-info .reset,
+.dd-workspace .dd-overview-info .analytics-row,
+.dd-workspace .dd-overview-info .note {
+  display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-start;
+  gap:4px 8px; margin:0; padding:0; border:0; border-radius:0;
+  background:transparent; text-align:left; color:var(--text);
+  font-size:13px; font-weight:550; line-height:1.55; letter-spacing:0;
+}
+.dd-workspace .dd-overview-info .note { display:block; }
+.dd-workspace .dd-overview-info .analytics-row strong {
+  color:var(--text); font-weight:750; font-variant-numeric:tabular-nums;
+}
+.dd-workspace .dd-overview-info .analytics-sep { opacity:.55; }
+@media(max-width:760px) {
+  .dd-overview-row { grid-template-columns:minmax(0,1fr); gap:10px; }
+  .dd-overview-left,.dd-overview-info { padding:12px 13px; }
+}
 #ddBulkUndo { position:fixed; z-index:10000; bottom:28px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:15px; padding:9px 12px 9px 16px; max-width:calc(100vw - 28px); width:max-content; border:1px solid var(--line); border-radius:13px; background:var(--text); color:var(--bg); box-shadow:var(--shadow); font-size:13px; }
 #ddBulkUndo button { min-height:44px; background:transparent; color:inherit; border:1px solid currentColor; border-radius:8px; padding:5px 12px; cursor:pointer; }
 .dd-workspace .notify-toast { max-width:calc(100vw - 32px); width:max-content; }
 @media(max-width:1100px) and (min-width:901px) {
   .dd-task-workspace { grid-template-columns:200px minmax(0,1fr); gap:16px 20px; }
-  .dd-page-footer { margin-left:220px; }
   .dd-category { gap:6px; padding:10px 8px; }
   .dd-workspace .boss-grid { grid-template-columns:1fr; }
 }
@@ -202,7 +234,6 @@ body.dd-workspace.dark .adventure-card { border-color:var(--line); background:va
   .dd-category-all { grid-column:1/-1; display:block; min-height:36px; text-align:center; padding:6px; border-style:dashed; background:transparent; font-size:12px; }
   .dd-view-tabs { width:100%; }
   .dd-view-tabs button, .dd-workspace .dd-view-tabs #favoriteFilter { flex:1; min-width:0; }
-  .dd-page-footer { margin-left:0; }
 }
 @media(max-width:680px) {
   body.dd-workspace { padding:18px 16px 150px; }
