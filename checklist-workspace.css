@@ -133,8 +133,8 @@ body.dd-workspace.dark .category-card:not(.dd-is-complete) .summary { color:var(
 .dd-workspace .box { outline-offset:3px; }
 .dd-workspace .item.done:not(.boss-item) { background:var(--dd-soft); }
 .dd-workspace .item.done .name { color:var(--accent); }
-.dd-workspace .favorite-btn { min-width:44px; min-height:44px; display:grid; place-items:center; padding:0; font-size:18px; font-weight:400; line-height:1; color:#c5c9d2; }
-.dd-workspace .favorite-btn.active { color:#f5b942; }
+.dd-workspace .favorite-btn { min-width:44px; min-height:44px; display:grid; place-items:center; padding:0; font-size:18px; font-weight:400; line-height:1; color:#87948b; }
+.dd-workspace .favorite-btn.active { color:var(--dd-gold); }
 .dd-workspace .day.long { flex-basis:150px; white-space:normal; font-size:11px; }
 .dd-workspace .item-actions { gap:0; }
 .dd-workspace .boss-tabs { grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; margin-bottom:10px; }
