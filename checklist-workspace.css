@@ -393,7 +393,7 @@ body.dd-workspace.dark .adventure-card { border-color:var(--line); background:va
 /* At narrow widths the title+count stay on row one, both actions share row two. */
 @media(max-width:680px) {
   .dd-workspace .category-card[data-category="每日 BOSS"] .section-head {
-    display:grid;grid-template-columns:minmax(0,1fr) auto 36px;
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 36px;
     gap:7px 6px;padding:12px;
   }
   .dd-workspace .category-card[data-category="每日 BOSS"] .section-title {
