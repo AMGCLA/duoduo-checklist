@@ -291,6 +291,8 @@ body.dark .category-card .section-head{background:linear-gradient(100deg,color-m
 </style>
 <script data-goatcounter="https://duoduovalley.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <link rel="stylesheet" href="cursor-ui/cursor.css?v=20261105-scrollglove">
+<link rel="stylesheet" href="checklist-workspace.css?v=20261109-1">
+<script defer src="checklist-workspace.js?v=20261109-1"></script>
 </head>
 <body>
 <div class="wrap">
@@ -1147,12 +1149,13 @@ document.getElementById("app").addEventListener("click", function(event){
 });
 
 function render(){
+  window.ddChecklistLayout?.beforeRender();
   if(reminderCountdownTimer){clearInterval(reminderCountdownTimer);reminderCountdownTimer=null;}
   const app=document.getElementById("app");
   app.innerHTML="";
   let dailyDone=0,dailyTotal=0,weeklyDone=0,weeklyTotal=0,remaining=[];
   const query=(document.getElementById("taskSearch")?.value||"").trim().toLowerCase();
-  const onlyFavorites=localStorage.getItem("dodogu_favorite_filter")==="1";
+  const onlyFavorites=localStorage.getItem("dodogu_favorite_filter")==="1" && !(window.ddChecklistLayout && query);
   const favorites=readChecklistRecord("dodogu_checklist_favorites");
 
   // 昨日漏掉的每日任務（只做提醒，不會影響今天完成度）
@@ -1356,10 +1359,11 @@ function render(){
       if(type==="daily" && available && !store[id]) remaining.push({section:title,name,daysText});
       const matches=!query || name.toLowerCase().includes(query) || title.toLowerCase().includes(query);
       const favMatch=!onlyFavorites || !!favorites[id];
-      if(matches && favMatch) visibleItems.push({name,daysText,days,localIndex,id,dayStyle:dayStyle||"",group:group||""});
+      if(matches && favMatch && (window.ddChecklistLayout?.includesTask(!!store[id]) ?? true)) visibleItems.push({name,daysText,days,localIndex,id,type,dayStyle:dayStyle||"",group:group||""});
     });
     if(type==="weekly"){ weeklyDone+=doneInSection; weeklyTotal+=items.length; }
     else { dailyDone+=doneInSection; dailyTotal+=activeTotal; }
+    if(window.ddChecklistLayout && !window.ddChecklistLayout.includesSection(sectionIndex,type,query,onlyFavorites)) return;
     if((query||onlyFavorites) && visibleItems.length===0) return;
 
     const totalInSection=type==="daily"?activeTotal:items.length;
@@ -1373,13 +1377,14 @@ function render(){
     head.innerHTML=`<span class="section-title">${title}</span><span class="summary">${doneInSection} / ${totalInSection}</span><button class="select-all-btn" type="button">${allChecked?"↩ 全部取消":"☑ 全選"}</button><button class="arrow category-toggle" type="button" aria-label="展開或收起${title}" aria-expanded="${!foldState[sectionIndex]}">⌄</button>`;
     addSectionTitleIcon(head.querySelector(".section-title"), title);
     const selectAllBtn=head.querySelector(".select-all-btn");
-    selectAllBtn.onclick=(e)=>{e.stopPropagation();items.forEach(([name,daysText,days],li)=>{const available=!days||days.includes(now.getDay());if(available){const id=taskId(type,name);if(!allChecked&&!store[id])recordAdventureTaskCompletion(type,id);store[id]=!allChecked;}});writeChecklistRecord(storageKey,store);render();};
+    selectAllBtn.onclick=(e)=>{e.stopPropagation();if(window.ddChecklistLayout){window.ddChecklistLayout.bulk(card,type);return;}items.forEach(([name,daysText,days],li)=>{const available=!days||days.includes(now.getDay());if(available){const id=taskId(type,name);if(!allChecked&&!store[id])recordAdventureTaskCompletion(type,id);store[id]=!allChecked;}});writeChecklistRecord(storageKey,store);render();};
     const body=document.createElement("div");body.className="items";
     const appendTaskRow=({name,daysText,days,id,dayStyle})=>{
       const available=!days||days.includes(now.getDay()); const checked=!!store[id]; const isFav=!!favorites[id];
       const uiIconFile=UI_ICON_MAP[name]||null;
       const row=document.createElement("div");row.className="item"+(uiIconFile?" has-ui-icon":"")+(checked?" done":"")+(!available?" disabled":"")+(checked&&pendingCompletionAnimationId===id?" just-completed":"");
       row.innerHTML=`<div class="box">${checked?"✓":""}</div>${uiIconFile?`<span class="task-ui-icon"><img src="${UI_ICON_BASE+uiIconFile}" alt="" loading="lazy" decoding="async"></span>`:""}<div class="name">${name}</div>${daysText?`<div class="day ${dayStyle||""}">${daysText}</div>`:""}<div class="item-actions"><button class="favorite-btn ${isFav?"active":""}" type="button" title="${isFav?"取消最愛":"加入最愛／置頂"}">${isFav?"★":"☆"}</button></div>`;
+      row.dataset.taskId=id;row.dataset.taskName=name;row.dataset.taskType=type;
       const favBtn=row.querySelector(".favorite-btn");
       favBtn.onclick=(e)=>{e.stopPropagation();favorites[id]=!favorites[id];if(!favorites[id])delete favorites[id];writeChecklistRecord("dodogu_checklist_favorites",favorites);render();};
       if(available) row.onclick=()=>{const nextChecked=!store[id];pendingCompletionAnimationId=nextChecked?id:null;if(nextChecked)recordAdventureTaskCompletion(type,id);store[id]=nextChecked;writeChecklistRecord(storageKey,store);render();pendingCompletionAnimationId=null;};
@@ -1390,8 +1395,9 @@ function render(){
       const imgPath=BOSS_IMAGE_MAP[base],difficultyPath=BOSS_DIFFICULTY_IMAGE_MAP[difficulty];
       const row=document.createElement("div");row.className="item boss-item"+(checked?" done":"")+(checked&&pendingCompletionAnimationId===x.id?" just-completed":"");
       row.innerHTML=`<div class="box">${checked?"✓":""}</div><img class="boss-image" src="${imgPath}" alt="${base}" title="${base}" loading="lazy"><img class="boss-difficulty-image" src="${difficultyPath}" alt="${difficulty}" title="${difficulty}" loading="lazy"><div class="item-actions"><button class="favorite-btn ${isFav?"active":""}" type="button" title="${isFav?"取消最愛":"加入最愛／置頂"}">${isFav?"★":"☆"}</button></div>`;
+      row.dataset.taskId=x.id;row.dataset.taskName=x.name;row.dataset.taskType=type;
       row.querySelector(".favorite-btn").onclick=(e)=>{e.stopPropagation();favorites[x.id]=!favorites[x.id];if(!favorites[x.id])delete favorites[x.id];writeChecklistRecord("dodogu_checklist_favorites",favorites);render();};
-      row.onclick=()=>{const nextChecked=!store[x.id];pendingCompletionAnimationId=nextChecked?x.id:null;if(nextChecked)recordAdventureTaskCompletion(x.type,x.id);store[x.id]=nextChecked;writeChecklistRecord(storageKey,store);render();pendingCompletionAnimationId=null;};
+      row.onclick=()=>{const nextChecked=!store[x.id];pendingCompletionAnimationId=nextChecked?x.id:null;if(nextChecked)recordAdventureTaskCompletion(type,x.id);store[x.id]=nextChecked;writeChecklistRecord(storageKey,store);render();pendingCompletionAnimationId=null;};
       return row;
     };
     if(title==="每日 BOSS" || title==="每週任務"){
@@ -1405,9 +1411,9 @@ function render(){
         let activeGroup=bossActiveGroups[type]||localStorage.getItem(activeGroupKey);
         // 每日與每週使用不同的選擇狀態；若記錄的分類在該區塊沒有項目，就切到第一個有資料的分類。
         if(!availableGroups.includes(activeGroup)) activeGroup=availableGroups[0]||null;
-        body.appendChild(makeBossTabs(allBossItems,store,activeGroup,(group)=>{bossActiveGroups[type]=group;localStorage.setItem(activeGroupKey,group);render();}));
+        if(!(window.ddChecklistLayout && (query||onlyFavorites))) body.appendChild(makeBossTabs(allBossItems,store,activeGroup,(group)=>{bossActiveGroups[type]=group;localStorage.setItem(activeGroupKey,group);render();}));
         const grid=document.createElement("div");grid.className="boss-grid";
-        const filtered=bossItems.filter(x=>x.group===activeGroup);
+        const filtered=window.ddChecklistLayout && (query||onlyFavorites) ? bossItems : bossItems.filter(x=>x.group===activeGroup);
         if(filtered.length) filtered.forEach(x=>grid.appendChild(appendBossTaskRow(x)));
         else if(!activeGroup){const empty=document.createElement("div");empty.className="boss-empty";empty.textContent="目前沒有符合條件的 BOSS";grid.appendChild(empty);}
         else {const empty=document.createElement("div");empty.className="boss-empty";empty.textContent="此分類目前沒有符合條件的 BOSS";grid.appendChild(empty);}
@@ -1456,6 +1462,7 @@ function render(){
   document.getElementById("completeBanner").classList.toggle("show",dailyTotal>0&&dailyDone===dailyTotal);
   renderAdventure(dailyDone,dailyTotal);
   const ff=document.getElementById("favoriteFilter");ff.classList.toggle("active",onlyFavorites);ff.textContent=onlyFavorites?"⭐ 顯示全部任務":"⭐ 只看最愛";
+  window.ddChecklistLayout?.afterRender();
 }
 
 const searchInput=document.getElementById("taskSearch");
@@ -1582,11 +1589,12 @@ render();
   // checklist DOM is dynamically updated. Ignore live task states and BGM data.
   function sourceParts(doc){
     const scripts=Array.from(doc.querySelectorAll('script'))
-      .filter(el=>!el.getAttribute('src')||el.getAttribute('src')?.split('?')[0]==='cursor-ui/cursor.js')
+      .filter(el=>!el.getAttribute('src')||['cursor-ui/cursor.js','checklist-workspace.js'].includes(el.getAttribute('src')?.split('?')[0]))
       .map(el=>
       [el.getAttribute('src')||'',el.getAttribute('type')||'',el.textContent||''].join('\u0000'));
     const styles=Array.from(doc.querySelectorAll('style')).map(el=>el.textContent||'');
-    return JSON.stringify([doc.title,scripts,styles]);
+    const layoutStyles=Array.from(doc.querySelectorAll('link[rel=stylesheet]')).map(el=>el.getAttribute('href')||'');
+    return JSON.stringify([doc.title,scripts,styles,layoutStyles]);
   }
   async function fingerprint(text){
     const bytes=new TextEncoder().encode(text.replace(/\r\n/g,'\n'));
