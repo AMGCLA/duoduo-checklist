@@ -178,20 +178,21 @@ body.dd-workspace.dark .adventure-card { border-color:var(--line); background:va
 .dd-workspace .dd-promo-disclosure .promo-wrap { border:0; margin:0; border-radius:0; padding:10px; }
 .dd-workspace .copy-btn, .dd-workspace .promo-link { min-height:44px; }
 .dd-workspace .promo-text { max-height:260px; }
-/* Compact task controls and three independent information cards. */
+/* Four equal-width, equal-height desktop cards: the first task card sets
+   the normal row height; explicit text lines prevent accidental wrap points. */
 .dd-overview-row {
   display:grid;
-  grid-template-columns:minmax(260px, 1.15fr) minmax(0, 3.05fr);
+  grid-template-columns:repeat(4, minmax(0,1fr));
+  align-items:stretch;
   gap:10px;
-  align-items:start;
   margin-top:12px;
 }
 .dd-overview-left {
   min-width:0;
-  align-self:start;
+  align-self:stretch;
   display:flex;
   flex-direction:column;
-  justify-content:flex-start;
+  justify-content:space-between;
   gap:9px;
   padding:12px 14px;
   border:1px solid var(--line);
@@ -213,16 +214,19 @@ body.dd-workspace.dark .adventure-card { border-color:var(--line); background:va
   flex-wrap:wrap;
   margin:0;
 }
+.dd-workspace .dd-overview-left .dd-quick-links button {
+  padding:7px 7px;
+  min-height:44px;
+  font-size:12.5px;
+}
 .dd-overview-info {
-  min-width:0;
-  display:grid;
-  grid-template-columns:minmax(0, 1.4fr) minmax(0, .85fr) minmax(0, 1.05fr);
-  gap:9px;
-  align-self:start;
+  display:contents;
 }
 .dd-info-card {
+  display:flex;
+  align-items:center;
   min-width:0;
-  padding:10px 14px;
+  padding:10px 12px;
   border:1px solid var(--line);
   border-radius:12px;
   background:var(--card);
@@ -231,14 +235,14 @@ body.dd-workspace.dark .adventure-card { border-color:var(--line); background:va
 .dd-workspace .dd-overview-info .analytics-row,
 .dd-workspace .dd-overview-info .note {
   display:flex;
-  align-items:center;
-  justify-content:flex-start;
-  flex-wrap:wrap;
-  gap:4px 8px;
+  align-items:flex-start;
+  justify-content:center;
+  flex-direction:column;
+  flex-wrap:nowrap;
+  gap:2px;
   margin:0;
   padding:0;
   border:0;
-  border-radius:0;
   background:transparent;
   color:var(--text);
   text-align:left;
@@ -247,7 +251,25 @@ body.dd-workspace.dark .adventure-card { border-color:var(--line); background:va
   line-height:1.6;
   letter-spacing:0;
 }
-.dd-workspace .dd-overview-info .note { display:block; }
+.dd-workspace .dd-overview-info .reset > span,
+.dd-workspace .dd-overview-info .dd-analytics-label,
+.dd-workspace .dd-overview-info .dd-analytics-values {
+  display:block;
+  max-width:100%;
+  white-space:normal;
+}
+.dd-workspace .dd-overview-info .dd-analytics-values {
+  display:inline-flex;
+  align-items:center;
+  flex-wrap:wrap;
+  column-gap:5px;
+}
+.dd-workspace .dd-overview-info .note {
+  display:block;
+  font-size:12.5px;
+  line-height:1.5;
+  overflow-wrap:break-word;
+}
 .dd-workspace .dd-overview-info .analytics-row strong {
   color:var(--text);
   font-weight:800;
@@ -255,9 +277,8 @@ body.dd-workspace.dark .adventure-card { border-color:var(--line); background:va
 }
 .dd-workspace .dd-overview-info .analytics-sep { opacity:.58; }
 @media(max-width:760px) {
-  .dd-overview-row { grid-template-columns:minmax(0, 1fr); gap:10px; }
-  .dd-overview-info { grid-template-columns:minmax(0, 1fr); }
-  .dd-overview-left, .dd-info-card { padding:11px 13px; }
+  .dd-overview-row { grid-template-columns:minmax(0,1fr); gap:10px; }
+  .dd-overview-left,.dd-info-card { padding:11px 13px; }
 }
 
 #ddBulkUndo { position:fixed; z-index:10000; bottom:28px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:15px; padding:9px 12px 9px 16px; max-width:calc(100vw - 28px); width:max-content; border:1px solid var(--line); border-radius:13px; background:var(--text); color:var(--bg); box-shadow:var(--shadow); font-size:13px; }
