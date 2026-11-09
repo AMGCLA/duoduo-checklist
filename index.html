@@ -1378,6 +1378,19 @@ function render(){
     head.innerHTML=`<span class="section-title">${title}</span><span class="summary">${doneInSection} / ${totalInSection}</span><button class="select-all-btn" type="button">${allChecked?"↩ 全部取消":"☑ 全選"}</button><button class="arrow category-toggle" type="button" aria-label="展開或收起${title}" aria-expanded="${!foldState[sectionIndex]}">⌄</button>`;
     addSectionTitleIcon(head.querySelector(".section-title"), title);
     const selectAllBtn=head.querySelector(".select-all-btn");
+    // Daily BOSS only: explicit cross-tier action, independent of the current BOSS tab.
+    // Hide it while searching or viewing favorites so hidden tasks are never changed by surprise.
+    if(title==="每日 BOSS" && !query && !onlyFavorites && window.ddChecklistLayout?.bulkAllDailyBosses){
+      const bossAllBtn=document.createElement("button");
+      bossAllBtn.type="button";
+      bossAllBtn.className="boss-all-complete-btn";
+      bossAllBtn.textContent=allChecked?"✓ 四階已完成":"☑ 四階全完成";
+      bossAllBtn.title="一次完成初階、中階、高階、終極的每日 BOSS；不影響每週 BOSS";
+      bossAllBtn.setAttribute("aria-label",allChecked?"每日 BOSS 四個階段全部完成":"一次完成每日 BOSS 初階、中階、高階、終極");
+      bossAllBtn.disabled=allChecked;
+      bossAllBtn.onclick=e=>{e.stopPropagation();window.ddChecklistLayout.bulkAllDailyBosses();};
+      head.insertBefore(bossAllBtn,selectAllBtn);
+    }
     selectAllBtn.onclick=(e)=>{e.stopPropagation();if(window.ddChecklistLayout){window.ddChecklistLayout.bulk(card,type);return;}items.forEach(([name,daysText,days],li)=>{const available=!days||days.includes(now.getDay());if(available){const id=taskId(type,name);if(!allChecked&&!store[id])recordAdventureTaskCompletion(type,id);store[id]=!allChecked;}});writeChecklistRecord(storageKey,store);render();};
     const body=document.createElement("div");body.className="items";
     const appendTaskRow=({name,daysText,days,id,dayStyle})=>{
@@ -1433,7 +1446,7 @@ function render(){
       try { saveFolds(); } catch (error) { console.warn("Checklist fold state could not be saved",error); }
     };
     head.addEventListener("click",(event)=>{
-      if(event.target.closest(".select-all-btn, .category-toggle")) return;
+      if(event.target.closest(".select-all-btn, .boss-all-complete-btn, .category-toggle")) return;
       toggleCategory();
     });
     categoryToggle.addEventListener("click",(event)=>{
