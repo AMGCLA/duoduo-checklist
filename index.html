@@ -1288,7 +1288,7 @@ function render(){
     const info=document.createElement("div");
     const closed=localStorage.getItem("dodogu_reminder_closed")==="1";
     info.className="section info-section"+(closed?" closed":"");
-    info.innerHTML=`<div class="section-head"><span class="section-title">每日活動提醒</span><span class="arrow">⌄</span></div><div class="items info-items"><div class="reminder-card"><div class="reminder-top"><div class="reminder-name">流浪商人</div><div class="reminder-next" id="merchantNext"></div></div><div class="reminder-line"><span class="reminder-label">出沒時段：</span></div><div class="reminder-times" id="merchantTimes"></div><div class="reminder-line" style="margin-top:8px"><span class="reminder-label">出沒頻道：</span>CH.6 頻道｜持續 30 分鐘</div><div class="reminder-line" style="margin-top:8px"><span class="reminder-label">出沒地點：</span>各村莊、城鎮</div></div><div class="reminder-card"><div class="reminder-top"><div class="reminder-name">世界秘寶</div><div class="reminder-next" id="treasureNext"></div></div><div class="reminder-line"><span class="reminder-label">出沒時段：</span></div><div class="reminder-times" id="treasureTimes"></div><div class="reminder-line" style="margin-top:8px"><span class="reminder-label">出沒頻道：</span>CH.7 頻道｜持續 30 分鐘</div><div class="reminder-line" style="margin-top:8px"><span class="reminder-label">出沒地點：</span>🔍 根據線索尋找秘寶蹤跡</div><div class="reminder-line" style="margin-top:8px"><span class="reminder-label">秘寶內容：</span>🎁 探索當日秘寶，領取神秘獎勵</div></div></div></div>`;
+    info.innerHTML=`<div class="section-head"><span class="section-title">每日活動提醒</span><span class="arrow">⌄</span></div><div class="items info-items"><div class="reminder-card"><div class="reminder-top"><div class="reminder-name">流浪商人</div><div class="reminder-next" id="merchantNext"></div></div><div class="reminder-line"><span class="reminder-label">出沒時段：</span></div><div class="reminder-times" id="merchantTimes"></div><div class="reminder-line" style="margin-top:8px"><span class="reminder-label">出沒頻道：</span>CH.4 頻道｜持續 30 分鐘</div><div class="reminder-line" style="margin-top:8px"><span class="reminder-label">出沒地點：</span>各村莊、城鎮</div></div><div class="reminder-card"><div class="reminder-top"><div class="reminder-name">世界秘寶</div><div class="reminder-next" id="treasureNext"></div></div><div class="reminder-line"><span class="reminder-label">出沒時段：</span></div><div class="reminder-times" id="treasureTimes"></div><div class="reminder-line" style="margin-top:8px"><span class="reminder-label">出沒頻道：</span>CH.5 頻道｜持續 30 分鐘</div><div class="reminder-line" style="margin-top:8px"><span class="reminder-label">出沒地點：</span>🔍 根據線索尋找秘寶蹤跡</div><div class="reminder-line" style="margin-top:8px"><span class="reminder-label">秘寶內容：</span>🎁 探索當日秘寶，領取神秘獎勵</div></div></div></div>`;
     addSectionTitleIcon(info.querySelector(".section-title"), "每日活動提醒");
       const reminderIconMap={"流浪商人":"流浪商人.png","世界秘寶":"世界祕寶.png"};
       info.querySelectorAll(".reminder-card").forEach(card=>{
@@ -1306,8 +1306,8 @@ function render(){
         card.appendChild(icon);
       });
     const schedules={
-      merchant:{times:["09:00","13:00","17:00","21:00","01:00"],duration:30},
-      treasure:{times:["10:00","14:00","18:00","22:00"],duration:30}
+      merchant:{times:["09:00","13:00","17:00","21:00","01:00","05:00"],duration:30},
+      treasure:{times:["10:00","14:00","18:00","22:00","02:00"],duration:30}
     };
     const now2=new Date();
     const updateReminderCountdown=()=>{
@@ -1474,8 +1474,8 @@ if(favoriteFilter){favoriteFilter.onclick=()=>{const on=localStorage.getItem("do
 const NOTIFY_KEY = "dodogu_activity_notify";
 const NOTIFY_SENT_KEY = "dodogu_activity_notify_sent";
 const ACTIVITY_SCHEDULES = [
-  {name:"流浪商人", times:["09:00","13:00","17:00","21:00","01:00"]},
-  {name:"世界秘寶", times:["10:00","14:00","18:00","22:00"]}
+  {name:"流浪商人", times:["09:00","13:00","17:00","21:00","01:00","05:00"]},
+  {name:"世界秘寶", times:["10:00","14:00","18:00","22:00","02:00"]}
 ];
 function notifyToast(msg){
   const el=document.getElementById("notifyToast"); if(!el) return;
