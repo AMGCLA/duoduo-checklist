@@ -275,8 +275,44 @@
     toast.hidden = false;
     undoTimer = setTimeout(() => { toast.hidden = true; undo = null; }, 10000);
   }
+  // Complete ALL four daily BOSS tiers, including rows hidden by the active tier tab.
+  // Only adds missing completions; never toggles unrelated daily or weekly tasks.
+  function bulkAllDailyBosses() {
+    const bossSection = sections.find(([title, type]) => title === '每日 BOSS' && type === 'daily');
+    if (!bossSection) return;
+    const eligible = bossSection[2].filter(row => available(row) && isBossTask(row[0]));
+    const missing = eligible.filter(row => !daily[taskId('daily', row[0])]);
+    if (!missing.length) return;
+    const snapshot = {
+      daily: structuredClone(daily), weekly: structuredClone(weekly),
+      adventure: structuredClone(adventureProfile), day: todayKey, week: weekKey
+    };
+    const updatedDaily = {...daily};
+    for (const row of missing) updatedDaily[taskId('daily', row[0])] = true;
+    // Save as one complete object first. On storage error, keep all existing progress unchanged.
+    try {
+      writeChecklistRecord('dodogu_daily_' + todayKey, updatedDaily);
+    } catch (error) {
+      console.warn('Checklist 每日 BOSS 四階完成儲存失敗', error?.name || error);
+      alert('目前無法儲存每日 BOSS 進度，原有勾選紀錄已保留。請檢查瀏覽器儲存空間。');
+      return;
+    }
+    daily = updatedDaily;
+    for (const row of missing) {
+      const id = taskId('daily', row[0]);
+      try { recordAdventureTaskCompletion('daily', id); }
+      catch (error) { console.warn('Checklist BOSS 冒險紀錄暫時無法更新', error?.name || error); }
+    }
+    render();
+    // Same 10-second rollback UI as the existing single-tier bulk action.
+    clearTimeout(undoTimer);
+    undo = snapshot;
+    toast.querySelector('span').textContent = '每日 BOSS 四階已全部完成（新增 ' + missing.length + ' 項）';
+    toast.hidden = false;
+    undoTimer = setTimeout(() => { toast.hidden = true; undo = null; }, 10000);
+  }
   window.ddChecklistLayout = {
-    beforeRender, afterRender, bulk,
+    beforeRender, afterRender, bulk, bulkAllDailyBosses,
     includesTask: done => !view.pending || !done,
     includesSection(index, type, q, favorites) {
       if (q) return true;
