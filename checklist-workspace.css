@@ -1,13 +1,13 @@
 /* A compact workspace around the original Checklist components and image assets. */
 body.dd-workspace {
-  --bg:#f6f5f2; --card:#fff; --text:#283b36; --muted:#6a7870;
+  --bg:#f6f5f2; --card:#fff; --text:#283b36; --muted:#58675e;
   --line:#e3e8e1; --bar:#e6ebe4; --accent:#38745b;
   --dd-soft:#edf5ee; --dd-gold:#a47b39; --shadow:0 8px 30px #253d2810;
   padding:26px 28px 150px; font-family:system-ui,-apple-system,"Microsoft JhengHei",sans-serif;
   line-height:1.55;
 }
 body.dd-workspace.dark {
-  --bg:#19221e; --card:#242f29; --text:#e9eee8; --muted:#acb8ae;
+  --bg:#19221e; --card:#242f29; --text:#e9eee8; --muted:#b9c8bd;
   --line:#3b4840; --bar:#3b4840; --accent:#a2d7ad; --dd-soft:#314b39;
   --dd-gold:#e3bd80; --shadow:none; color-scheme:dark;
 }
@@ -23,67 +23,65 @@ body.dd-workspace.dark {
   outline:3px solid var(--dd-gold); outline-offset:3px;
 }
 .dd-workspace button { font-family:inherit; }
-.dd-tools { position:relative; flex:none; z-index:110; }
-.dd-tools > summary {
-  display:flex; align-items:center; justify-content:center; gap:7px; min-height:44px; min-width:76px;
-  list-style:none; padding:8px 12px; border:1px solid var(--line); border-radius:12px;
-  background:var(--card); font-size:20px; cursor:pointer;
+/* Keep frequently used tools visible below the greeting, without nested menus. */
+.dd-workspace .dd-header-controls {
+  display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:0 0 20px;
+  padding:12px; border:1px solid var(--line); border-radius:14px; background:var(--card);
 }
-.dd-tools > summary span { font-size:12px; }
-.dd-tools > summary::-webkit-details-marker { display:none; }
-.dd-workspace .dd-tools .controls {
-  position:absolute; right:0; top:calc(100% + 8px); margin:0; width:280px; max-width:calc(100vw - 32px);
-  display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:13px;
-  border:1px solid var(--line); border-radius:15px; background:var(--card); box-shadow:var(--shadow);
+.dd-workspace .dd-header-controls > * { min-width:0; flex:1 1 auto; }
+.dd-workspace .dd-header-controls button, .dd-workspace .dd-header-controls a,
+.dd-workspace .dd-checklist-progress-trigger {
+  display:inline-flex; align-items:center; justify-content:center; text-align:center;
+  min-height:44px; padding:9px 12px; font-size:13px; font-weight:600; line-height:1.4;
 }
-.dd-workspace .dd-tools:not([open]) .controls { display:none; }
-.dd-workspace .controls > * { min-width:0; }
-.dd-workspace .controls button, .dd-workspace .controls a,
-.dd-workspace .dd-checklist-progress-trigger { min-height:44px; font-size:12px; padding:8px; justify-content:center; text-align:center; }
-.dd-workspace .controls #themeBtn, .dd-workspace .controls #notifyBtn { grid-column:1/-1; }
-.dd-workspace .dd-checklist-progress-menu { grid-column:1/-1; }
-.dd-workspace .dd-checklist-progress-trigger { width:100%; display:flex; }
-.dd-workspace .dd-checklist-progress-panel { position:static; width:100%; margin-top:7px; box-shadow:none; padding:9px; }
-.dd-workspace .dd-checklist-progress-panel button { text-align:left; }
+.dd-workspace .dd-header-controls #themeBtn { border-color:var(--line); }
+.dd-workspace .dd-checklist-progress-menu { position:relative; }
+.dd-workspace .dd-checklist-progress-trigger { display:flex; width:100%; }
+.dd-workspace .dd-checklist-progress-panel {
+  z-index:110; width:260px; max-width:calc(100vw - 48px); right:0; left:auto;
+  border-color:var(--line); padding:12px;
+}
+.dd-workspace .dd-checklist-progress-panel button { justify-content:flex-start; text-align:left; width:100%; }
+.dd-workspace .dd-checklist-progress-hint { font-size:12px; font-weight:500; }
 .dd-greeting { display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:16px; }
 .dd-greeting h2 { margin:0; font-size:26px; font-weight:650; letter-spacing:.035em; }
-.dd-greeting .date { font-size:12px; }
+.dd-greeting .date { font-size:12px; font-weight:500; }
 .dd-workspace .progress-row { grid-template-columns:1fr 1fr; gap:14px; margin:0; }
 .dd-workspace .progress-card {
   display:grid; grid-template-columns:1fr auto; align-items:center; gap:6px 12px;
   padding:16px 20px; border:1px solid var(--line); border-radius:16px; background:var(--card);
 }
-.dd-workspace .progress-card .label { margin:0; font-size:13px; }
+.dd-workspace .progress-card .label { margin:0; font-size:13px; font-weight:600; }
 .dd-workspace .progress-card .value { font-size:19px; font-weight:650; font-variant-numeric:tabular-nums; }
 .dd-workspace .progress-card .bar { grid-column:1/-1; height:5px; margin-top:5px; }
 .dd-workspace #weeklyFill { background:var(--dd-gold); }
-.dd-workspace .remaining { margin:10px 0 0; padding:0 2px; font-size:12px; font-weight:400; }
+.dd-workspace .remaining { margin:10px 0 0; padding:0 2px; font-size:13px; font-weight:600; }
 .dd-quick-links { display:flex; gap:9px; margin-top:8px; flex-wrap:wrap; }
 .dd-quick-links button {
-  background:none; color:var(--muted); border:0; border-bottom:1px solid var(--line); padding:6px 2px;
-  min-height:40px; font-size:12px; cursor:pointer;
+  background:var(--card); color:var(--text); border:1px solid var(--line); border-radius:9px; padding:7px 12px;
+  min-height:44px; font-size:13px; font-weight:600; cursor:pointer;
 }
 .dd-quick-links button:hover { color:var(--accent); border-color:var(--accent); }
 .dd-task-workspace { display:grid; grid-template-columns:224px minmax(0,1fr); grid-template-areas:"sidebar toolbar" "sidebar tasks"; gap:16px 26px; align-items:start; }
 .dd-sidebar { grid-area:sidebar; position:sticky; top:18px; }
-.dd-nav-heading { font-size:11px; letter-spacing:.12em; color:var(--muted); margin:4px 12px 13px; }
+.dd-nav-heading { font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--muted); margin:4px 12px 13px; }
 #ddCategories { display:grid; gap:7px; }
 .dd-category {
   display:grid; grid-template-columns:25px minmax(0,1fr) auto; gap:9px; align-items:center;
   min-height:54px; padding:11px 12px; border:1px solid transparent; border-radius:12px;
-  color:var(--text); background:transparent; text-align:left; font-size:14px; cursor:pointer;
+  color:var(--text); background:transparent; text-align:left; font-size:15px; font-weight:600; cursor:pointer;
 }
 .dd-category[aria-pressed=true] { background:var(--card); border-color:var(--line); color:var(--accent); box-shadow:var(--shadow); font-weight:700; }
 .dd-nav-icon { display:flex; width:25px; height:25px; align-items:center; justify-content:center; }
 .dd-nav-icon img { width:25px; height:25px; object-fit:contain; }
 .dd-category-label { min-width:0; }
-.dd-category-count { font-size:11px; font-weight:400; color:var(--muted); white-space:nowrap; font-variant-numeric:tabular-nums; }
+.dd-category-count { font-size:12px; font-weight:600; color:var(--muted); white-space:nowrap; font-variant-numeric:tabular-nums; }
 .dd-category.dd-is-complete { background:var(--dd-soft); border-color:color-mix(in srgb,var(--accent) 28%,var(--line)); }
-.dd-category.dd-is-complete .dd-category-label::after { content:'已完成'; display:block; font-size:10px; font-weight:500; color:var(--accent); }
+.dd-category.dd-is-complete .dd-category-label::after { content:'已完成'; display:block; font-size:11px; font-weight:600; color:var(--accent); }
 .dd-category.dd-is-complete .dd-category-count { color:var(--accent); }
 .dd-category.dd-is-complete[aria-pressed=true] { border-color:var(--accent); box-shadow:inset 3px 0 var(--accent); }
 .dd-category-all { display:block; text-align:left; }
-.dd-side-note { margin:23px 12px; font-size:12px; color:var(--muted); line-height:1.9; }
+.dd-side-note { margin:23px 12px; font-size:13px; font-weight:500; color:var(--muted); line-height:1.9; }
 .dd-task-toolbar { grid-area:toolbar; min-width:0; }
 .dd-view-tabs { display:flex; width:fit-content; gap:4px; padding:4px; border-radius:13px; background:var(--line); }
 .dd-view-tabs button, .dd-workspace .dd-view-tabs #favoriteFilter {
@@ -95,7 +93,7 @@ body.dd-workspace.dark {
 .dd-workspace .search-input { min-width:0; width:100%; font-size:16px; min-height:44px; flex:1; }
 .dd-pending-filter { display:flex; align-items:center; gap:6px; min-height:44px; white-space:nowrap; font-size:13px; cursor:pointer; }
 .dd-pending-filter input { accent-color:var(--accent); width:18px; height:18px; margin:0; }
-.dd-view-caption { color:var(--muted); font-size:11px; margin-top:9px; min-height:17px; overflow-wrap:anywhere; }
+.dd-view-caption { color:var(--muted); font-size:12px; font-weight:500; margin-top:9px; min-height:17px; overflow-wrap:anywhere; }
 .dd-task-content { grid-area:tasks; min-width:0; }
 .dd-workspace #app { display:flex; flex-direction:column; gap:13px; }
 .dd-workspace #app > .category-card, .dd-workspace #app > .search-empty, .dd-workspace #app > .dd-empty { order:0; }
@@ -110,14 +108,20 @@ body.dd-workspace.dark {
 .dd-workspace .category-card .section-title, .dd-workspace .section.incomplete .section-title,
 .dd-workspace .section.weekly-incomplete .section-title { color:var(--text); font-size:18px; font-weight:700; }
 .dd-workspace .category-card .section-title { min-width:0; gap:8px; }
+body.dd-workspace.dark .category-card:not(.dd-is-complete) .section-head { background:var(--card); }
+body.dd-workspace.dark .category-card:not(.dd-is-complete) .section-title { color:var(--text); }
+body.dd-workspace.dark .category-card:not(.dd-is-complete) .summary { color:var(--muted); }
 .dd-workspace .category-card.dd-is-complete { border-color:color-mix(in srgb,var(--accent) 35%,var(--line)); }
 .dd-workspace .category-card.dd-is-complete .section-head { background:var(--dd-soft); }
 .dd-workspace .category-card.dd-is-complete .section-title { color:var(--accent); flex-wrap:wrap; }
 .dd-completion-badge { display:inline-flex; align-items:center; white-space:nowrap; font-size:11px; font-weight:550; border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line)); border-radius:20px; padding:2px 8px; background:var(--card); color:var(--accent); }
 .dd-just-completed { animation:dd-category-completed .65s ease-out; }
 @keyframes dd-category-completed { 0% { box-shadow:0 0 0 0 #4f986733; } 45% { box-shadow:0 0 0 4px #4f986722; } 100% { box-shadow:var(--shadow); } }
-.dd-workspace .section-title > .ui-title-icon { margin-right:0; width:25px; height:25px; }
-.dd-workspace .category-card .summary { color:var(--muted); font-size:12px; font-weight:400; margin-right:0; }
+/* Every title needs its own icon gap; info headers are not category headers. */
+.dd-workspace .section-title { display:flex; align-items:center; gap:9px; min-width:0; line-height:1.5; }
+.dd-workspace .section-title > .ui-title-icon { margin:0; width:25px; height:25px; flex:0 0 25px; }
+.dd-workspace .section-title > .ui-title-icon img { display:block; }
+.dd-workspace .category-card .summary { color:var(--muted); font-size:12px; font-weight:600; margin-right:0; }
 .dd-workspace .select-all-btn { color:var(--accent); min-height:44px; font-size:12px; padding:6px 10px; }
 .dd-workspace .select-all-btn:disabled { opacity:.5; cursor:default; }
 .dd-workspace .category-toggle { width:44px; height:44px; flex:0 0 44px; background-size:25px 13px; }
@@ -148,7 +152,7 @@ body.dd-workspace.dark {
 .dd-workspace .item.boss-item.done { background:var(--dd-soft); }
 .dd-workspace .dd-empty { padding:30px 18px; text-align:center; font-size:13px; color:var(--muted); }
 .dd-workspace .info-section .section-head, .dd-workspace .favorite-panel .section-head { min-height:58px; padding:13px 16px; gap:10px; }
-.dd-workspace .info-section .section-title, .dd-workspace .favorite-panel .section-title { font-size:14px; }
+.dd-workspace .info-section .section-title, .dd-workspace .favorite-panel .section-title { font-size:15px; font-weight:650; }
 .dd-workspace .info-section .arrow, .dd-workspace .favorite-panel .arrow { flex:none; }
 .dd-workspace .reminder-top { flex-wrap:wrap; }
 .dd-workspace .reminder-next { position:static; text-align:left; max-width:100%; }
@@ -156,8 +160,15 @@ body.dd-workspace.dark {
 .dd-workspace .favorite-sync-name { font-size:12px; }
 .dd-workspace .favorite-sync-list { gap:8px; }
 .dd-workspace .adventure-card { margin:13px 0 0; border-color:var(--line); background:var(--card); box-shadow:var(--shadow); border-radius:15px; }
+body.dd-workspace.dark .adventure-card { border-color:var(--line); background:var(--card); }
 .dd-workspace .adventure-head { min-height:38px; }
-.dd-workspace .adventure-title { font-size:15px; }
+.dd-workspace .adventure-title { font-size:16px; }
+.dd-workspace .adventure-subtitle, .dd-workspace .adventure-xp-text { font-size:12px; font-weight:500; }
+.dd-workspace .adventure-event-desc, .dd-workspace .adventure-challenge-desc { font-size:13px; font-weight:500; }
+.dd-workspace .adventure-label, .dd-workspace .adventure-reward, .dd-workspace .adventure-challenge-meta { font-size:12px; }
+.dd-workspace .adventure-label { font-weight:650; }
+.dd-workspace .adventure-achievement-name { font-size:12px; }
+.dd-workspace .adventure-achievement-desc, .dd-workspace .adventure-achievement-state { font-size:11px; }
 .dd-workspace .adventure-kicker { display:none; }
 .dd-workspace .adventure-collapse { min-width:44px; min-height:44px; }
 .dd-workspace .adventure-spark { width:34px; height:34px; flex-basis:34px; font-size:21px; background:var(--dd-soft); color:var(--accent); box-shadow:none; }
@@ -186,7 +197,7 @@ body.dd-workspace.dark {
   #ddCategories { grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
   .dd-category { grid-template-columns:25px minmax(0,1fr); grid-template-rows:auto auto; gap:0 7px; min-height:57px; padding:8px 10px; background:var(--card); border-color:var(--line); font-size:13px; }
   .dd-nav-icon { grid-row:1/3; }
-  .dd-category-count { grid-column:2; font-size:10px; }
+  .dd-category-count { grid-column:2; font-size:11px; }
   .dd-category[aria-pressed=true] { background:var(--dd-soft); border-color:var(--accent); box-shadow:none; }
   .dd-category-all { grid-column:1/-1; display:block; min-height:36px; text-align:center; padding:6px; border-style:dashed; background:transparent; font-size:12px; }
   .dd-view-tabs { width:100%; }
@@ -200,23 +211,31 @@ body.dd-workspace.dark {
   .dd-workspace .brand-heading { font-size:19px; gap:9px; }
   .dd-workspace .brand-heading span { font-size:19px; }
   .dd-workspace .brand-logo { width:78px; height:39px; }
-  .dd-tools > summary { min-width:44px; padding:8px; }
-  .dd-tools > summary span { display:none; }
+  .dd-workspace .dd-header-controls { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); padding:10px; gap:8px; margin-bottom:16px; }
+  .dd-workspace .dd-header-controls > * { width:100%; }
+  .dd-workspace .dd-header-controls #themeBtn { order:0; }
+  .dd-workspace .dd-header-controls .dd-checklist-progress-menu { order:1; }
+  .dd-workspace .dd-header-controls #expandAll { order:2; }
+  .dd-workspace .dd-header-controls #collapseAll { order:3; }
+  .dd-workspace .dd-header-controls .official-btn { order:4; }
+  .dd-workspace .dd-header-controls .guide-btn { order:5; }
+  .dd-workspace .dd-header-controls #notifyBtn { order:6; grid-column:1/-1; }
+  .dd-workspace .dd-checklist-progress-panel { width:min(280px,calc(100vw - 64px)); }
   .dd-greeting { align-items:start; gap:6px; }
   .dd-greeting h2 { font-size:22px; }
-  .dd-greeting .date { padding-top:7px; font-size:10px; }
+  .dd-greeting .date { padding-top:7px; font-size:11px; }
   .dd-workspace .progress-row { gap:10px; }
   .dd-workspace .progress-card { padding:12px; gap:5px; border-radius:14px; }
-  .dd-workspace .progress-card .label { font-size:11px; }
+  .dd-workspace .progress-card .label { font-size:12px; }
   .dd-workspace .progress-card .value { font-size:16px; }
   .dd-quick-links { margin-top:3px; }
   .dd-workspace .search-row { gap:9px; margin-top:13px; }
   .dd-pending-filter { font-size:12px; gap:5px; }
   .dd-view-tabs button, .dd-workspace .dd-view-tabs #favoriteFilter { padding:8px 10px; font-size:13px; }
-  .dd-view-caption { font-size:10px; }
+  .dd-view-caption { font-size:12px; }
   .dd-workspace .category-card .section-head { display:grid; grid-template-columns:minmax(0,1fr) auto auto; gap:4px 8px; padding:12px 14px; }
   .dd-workspace .category-card .section-title { grid-column:1/3; font-size:17px; }
-  .dd-workspace .category-card .summary { grid-column:3; justify-self:end; font-size:11px; }
+  .dd-workspace .category-card .summary { grid-column:3; justify-self:end; font-size:12px; }
   .dd-workspace .select-all-btn { grid-column:1/3; justify-self:start; min-height:40px; }
   .dd-workspace .category-toggle { grid-column:3; justify-self:end; }
   .dd-workspace .category-card .items { padding:0 12px 10px; }
@@ -254,5 +273,5 @@ body.dd-workspace.dark {
   .dd-workspace .item.boss-item .box { flex-basis:20px; }
 }
 @media(prefers-reduced-motion:reduce) {
-  .dd-workspace *, .dd-workspace *::before, .dd-workspace *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+  .dd-workspace, .dd-workspace *, .dd-workspace *::before, .dd-workspace *::after { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
 }
