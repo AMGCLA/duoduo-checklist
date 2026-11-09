@@ -289,10 +289,10 @@ body.dark .category-card .section-head{background:linear-gradient(100deg,color-m
 }
 
 </style>
-<script data-goatcounter="https://duoduovalley.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script data-goatcounter="https://duoduovalley.goatcounter.com/count" data-goatcounter-settings='{"path": "/duoduo-checklist/"}' async src="https://gc.zgo.at/count.js"></script>
 <link rel="stylesheet" href="cursor-ui/cursor.css?v=20261105-scrollglove">
-<link rel="stylesheet" href="checklist-workspace.css?v=20261109-2">
-<script defer src="checklist-workspace.js?v=20261109-3"></script>
+<link rel="stylesheet" href="checklist-workspace.css?v=20261109-info-1">
+<script defer src="checklist-workspace.js?v=20261109-info-1"></script>
 </head>
 <body>
 <div class="wrap">
@@ -1546,33 +1546,49 @@ const FIVE_STAR_REVIEW_TEXT = `多多谷 ฅ^•ﻌ•^ฅ｜把每一次成長�
 const GOATCOUNTER_CODE = "duoduovalley";
 
 async function initAnalytics(){
-  const todayEl = document.getElementById("todayVisitors");
-  const totalEl = document.getElementById("totalVisitors");
-  if(!todayEl || !totalEl) return;
+  const todayEl=document.getElementById("todayVisitors");
+  const totalEl=document.getElementById("totalVisitors");
+  const row=document.getElementById("analyticsRow");
+  if(!todayEl||!totalEl||!row)return;
 
-  const today = new Date().toISOString().slice(0,10);
-  const path = window.location.pathname || "/";
-  const pathEncoded = encodeURIComponent(path);
-  const todayUrl = "https://" + GOATCOUNTER_CODE + ".goatcounter.com/counter/" + pathEncoded + ".json?start=" + today;
-  const totalUrl = "https://" + GOATCOUNTER_CODE + ".goatcounter.com/counter/" + pathEncoded + ".json";
-
-  try{
-    const [todayRes,totalRes] = await Promise.all([
-      fetch(todayUrl,{cache:"no-store"}),
-      fetch(totalUrl,{cache:"no-store"})
-    ]);
-    if(!todayRes.ok || !totalRes.ok) throw new Error("GoatCounter statistics unavailable");
-    const [todayData,totalData] = await Promise.all([todayRes.json(),totalRes.json()]);
-    todayEl.textContent = todayData.count ?? "0";
-    totalEl.textContent = totalData.count ?? "0";
-  }catch(err){
-    console.warn("GoatCounter 瀏覽統計載入失敗：",err);
-    todayEl.textContent = "—";
-    totalEl.textContent = "—";
+  // A public, separate Checklist path; never query the admin-only website stats.
+  // GoatCounter reports visits (deduplicated by session), not real-time unique users.
+  const today=new Date(Date.now()+8*60*60*1000).toISOString().slice(0,10);
+  const url="https://"+GOATCOUNTER_CODE+".goatcounter.com/counter/"+
+    encodeURIComponent("/duoduo-checklist/")+".json";
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),9000);
+  async function readCount(suffix){
+    const response=await fetch(url+suffix,{cache:"no-store",signal:controller.signal});
+    if(!response.ok)throw new Error("GoatCounter HTTP "+response.status);
+    const data=await response.json();
+    const count=data?.count;
+    if(!((typeof count==="string"&&/^\\d[\\d,]*$/.test(count))||
+         (typeof count==="number"&&Number.isFinite(count)&&count>=0)))
+      throw new Error("GoatCounter count format error");
+    return String(count);
   }
+  try{
+    const results=await Promise.allSettled([
+      readCount("?start="+encodeURIComponent(today)),
+      readCount("")
+    ]);
+    todayEl.textContent=results[0].status==="fulfilled"?results[0].value:"—";
+    totalEl.textContent=results[1].status==="fulfilled"?results[1].value:"—";
+    row.title=results.some(x=>x.status==="rejected")
+      ?"Checklist 瀏覽統計暫時無法完整取得，請確認 GoatCounter 的公開計數設定"
+      :"Checklist 獨立瀏覽次數（GoatCounter；統計可能延遲，今日以台灣日期計算）";
+    if(results.some(x=>x.status==="rejected"))
+      console.warn("Checklist 瀏覽統計部分資料無法取得");
+  }catch(error){
+    todayEl.textContent="—";totalEl.textContent="—";
+    row.title="Checklist 瀏覽統計目前無法取得；任務功能不受影響";
+    console.warn("Checklist 瀏覽統計讀取失敗：",error);
+  }finally{clearTimeout(timer);}
 }
-
 initAnalytics();
+setInterval(()=>{if(!document.hidden&&navigator.onLine)initAnalytics()},10*60*1000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)initAnalytics()});
 
 render();
 
