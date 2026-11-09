@@ -25,13 +25,6 @@
   const content = shell.querySelector('main');
   content.append(app);
   $('.progress-row').after(adventure);
-  const footer = document.createElement('footer');
-  footer.className = 'dd-page-footer';
-  for (const selector of ['.reset', '.analytics-row', '.note']) {
-    const node = $(selector); if (node) footer.append(node);
-  }
-  shell.after(footer);
-
   // Move the original controls with their original listeners intact.
   const controls = $('.controls');
   controls.prepend($('#themeBtn'));
@@ -59,7 +52,25 @@
   quickLinks.className = 'dd-quick-links';
   quickLinks.setAttribute('aria-label', '提醒與冒險');
   quickLinks.innerHTML = '<button type="button" data-info="reminder">活動提醒</button><button type="button" data-info="yesterday">昨日遺漏</button><button type="button" data-info="adventure">冒險成就</button>';
-  hero.append(quickLinks);
+  // Keep the status, quick actions and explanatory information at equal height.
+  // Reuse the original nodes so progress and visitor-count listeners remain intact.
+  const overview = document.createElement('section');
+  overview.className = 'dd-overview-row';
+  overview.setAttribute('aria-label', '任務進度與資訊');
+  const overviewLeft = document.createElement('div');
+  overviewLeft.className = 'dd-overview-left';
+  const remaining = $('.remaining');
+  if (remaining) overviewLeft.append(remaining);
+  overviewLeft.append(quickLinks);
+  const overviewInfo = document.createElement('aside');
+  overviewInfo.className = 'dd-overview-info';
+  overviewInfo.setAttribute('aria-label', '重置時間、瀏覽統計與使用說明');
+  for (const selector of ['.reset', '.analytics-row', '.note']) {
+    const node = $(selector);
+    if (node) overviewInfo.append(node);
+  }
+  overview.append(overviewLeft, overviewInfo);
+  hero.append(overview);
   const toast = document.createElement('div');
   toast.id = 'ddBulkUndo'; toast.hidden = true; toast.setAttribute('role', 'status');
   toast.innerHTML = '<span></span><button type="button">復原</button>';
