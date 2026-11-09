@@ -1563,7 +1563,7 @@ async function initAnalytics(){
     if(!response.ok)throw new Error("GoatCounter HTTP "+response.status);
     const data=await response.json();
     const count=data?.count;
-    if(!((typeof count==="string"&&/^\\d[\\d,]*$/.test(count))||
+    if(!((typeof count==="string"&&/^\d[\d,]*$/.test(count))||
          (typeof count==="number"&&Number.isFinite(count)&&count>=0)))
       throw new Error("GoatCounter count format error");
     return String(count);
