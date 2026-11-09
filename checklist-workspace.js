@@ -23,7 +23,8 @@
   shell.innerHTML = `<aside class="dd-sidebar"><div class="dd-nav-heading">任務分類 / CATEGORIES</div><nav id="ddCategories" aria-label="任務分類"></nav><p class="dd-side-note">依照自己的步調完成任務。<br>常做的項目點一下 ☆，<br>下次從「我的最愛」快速開始。</p></aside><div class="dd-task-toolbar"><nav class="dd-view-tabs" aria-label="任務範圍"><button type="button" data-view="daily">每日任務</button><button type="button" data-view="weekly">每週任務</button></nav><div id="ddFilterSlot"></div><div class="dd-view-caption" id="ddViewCaption" role="status" aria-live="polite"></div></div><main class="dd-task-content" aria-label="任務清單"></main>`;
   hero.after(shell);
   const content = shell.querySelector('main');
-  content.append(app, adventure);
+  content.append(app);
+  $('.progress-row').after(adventure);
   const footer = document.createElement('footer');
   footer.className = 'dd-page-footer';
   for (const selector of ['.reset', '.analytics-row', '.note']) {
@@ -32,18 +33,17 @@
   shell.after(footer);
 
   // Move the original controls with their original listeners intact.
-  const tools = document.createElement('details');
-  tools.className = 'dd-tools';
-  tools.innerHTML = '<summary aria-label="更多選項、備份與活動通知">⋯ <span>選項</span></summary>';
   const controls = $('.controls');
   controls.prepend($('#themeBtn'));
-  tools.append(controls);
-  $('.hero-top').append(tools);
+  controls.classList.add('dd-header-controls');
+  controls.setAttribute('role', 'group');
+  controls.setAttribute('aria-label', '常用工具與設定');
   const greeting = document.createElement('div');
   greeting.className = 'dd-greeting';
   greeting.innerHTML = '<h2>今天，也前進一點。</h2>';
   greeting.append($('#today'));
   $('.hero-top').after(greeting);
+  greeting.after(controls);
   $('.brand-heading span').textContent = '冒險任務清單';
   const tabs = $('.dd-view-tabs');
   tabs.append($('#favoriteFilter'));
@@ -304,13 +304,14 @@
     writeChecklistRecord('dodogu_weekly_' + weekKey, weekly);
     saveAdventureProfile(); render();
   });
-  document.addEventListener('click', event => { if (!tools.contains(event.target)) tools.open = false; });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape' && tools.open) { tools.open = false; tools.querySelector('summary').focus(); } });
+  const progressMenu = $('.dd-checklist-progress-menu');
+  document.addEventListener('click', event => { if (!progressMenu.contains(event.target)) progressMenu.open = false; });
+  document.addEventListener('keydown', event => { if (event.key === 'Escape' && progressMenu.open) { progressMenu.open = false; progressMenu.querySelector('summary').focus(); } });
   // All-expand/all-collapse retain their original behavior and reveal the complete scope.
   for (const id of ['expandAll', 'collapseAll']) {
     const button = $('#' + id), original = button.onclick;
     button.onclick = event => {
-      view.categories[activeView()] = 'all'; saveView(); original.call(button, event); syncInfoAccessibility(); tools.open = false;
+      view.categories[activeView()] = 'all'; saveView(); original.call(button, event); syncInfoAccessibility();
     };
   }
   openSelected();
