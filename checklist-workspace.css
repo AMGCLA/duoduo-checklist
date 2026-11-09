@@ -414,3 +414,66 @@ body.dd-workspace.dark .adventure-card { border-color:var(--line); background:va
     min-width:0;width:100%;min-height:40px;padding:6px 8px;font-size:11px;
   }
 }
+
+/* Taipei calendar + live 24h clock: visual-only header improvement. */
+.dd-workspace .dd-greeting {
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px 18px;
+}
+.dd-workspace .dd-greeting h2 { flex:1 1 240px; min-width:0; }
+.dd-workspace .dd-datetime-panel {
+  box-sizing:border-box;
+  flex:0 1 auto;
+  display:grid;gap:5px;
+  min-width:240px;max-width:100%;
+  padding:10px 14px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--card);
+  color:var(--text);
+  box-shadow:0 2px 12px rgba(18,56,34,.045);
+}
+.dd-workspace .dd-datetime-date-row,
+.dd-workspace .dd-datetime-clock-row {
+  display:flex;align-items:center;gap:8px;
+  min-width:0;
+  white-space:nowrap;
+}
+.dd-workspace .dd-datetime-icon {
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:0 0 20px;
+  font-size:15px;
+  color:var(--accent);
+}
+.dd-workspace .dd-greeting #today.date {
+  padding:0;margin:0;
+  font-size:14px;font-weight:700;line-height:1.45;
+  color:var(--text);
+  letter-spacing:.015em;
+  font-variant-numeric:tabular-nums;
+}
+.dd-workspace .dd-datetime-period {
+  font-size:12px;font-weight:750;
+  color:var(--accent);
+}
+.dd-workspace .dd-datetime-digits {
+  color:var(--text);
+  font-size:19px;font-weight:750;line-height:1.25;
+  letter-spacing:.05em;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum";
+}
+.dd-workspace .dd-datetime-zone {
+  margin-left:auto;
+  font-size:10px;font-weight:600;
+  color:var(--muted);
+  letter-spacing:.02em;
+}
+@media(max-width:560px) {
+  .dd-workspace .dd-greeting {align-items:flex-start;gap:10px;}
+  .dd-workspace .dd-greeting h2 {flex-basis:100%;}
+  .dd-workspace .dd-datetime-panel {width:100%;min-width:0;padding:9px 12px;}
+  .dd-workspace .dd-greeting #today.date {font-size:13px;}
+  .dd-workspace .dd-datetime-digits {font-size:18px;}
+}
