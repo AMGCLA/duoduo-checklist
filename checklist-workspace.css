@@ -406,11 +406,11 @@ body.dd-workspace.dark .adventure-card { border-color:var(--line); background:va
     grid-column:3;grid-row:1;justify-self:end;width:36px;min-width:36px;
   }
   .dd-workspace .category-card[data-category="每日 BOSS"] .boss-all-complete-btn {
-    grid-column:1;grid-row:2;width:100%;min-height:40px;
+    grid-column:2 / 4;grid-row:2;width:100%;min-height:40px;
     padding:6px 5px;font-size:11px;
   }
   .dd-workspace .category-card[data-category="每日 BOSS"] .select-all-btn {
-    grid-column:2 / 4;grid-row:2;justify-self:stretch;
+    grid-column:1;grid-row:2;justify-self:stretch;
     min-width:0;width:100%;min-height:40px;padding:6px 8px;font-size:11px;
   }
 }
