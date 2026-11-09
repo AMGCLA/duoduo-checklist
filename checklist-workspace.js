@@ -158,18 +158,41 @@
   datePanel.setAttribute('aria-label','台灣日期與即時時間');
   const dateRow=document.createElement('div');
   dateRow.className='dd-datetime-date-row';
-  const dateIcon=document.createElement('span');
-  dateIcon.className='dd-datetime-icon';
-  dateIcon.textContent='📅';
-  dateIcon.setAttribute('aria-hidden','true');
+  // Matching lightweight line icons (same viewBox, stroke, size and color).
+  function createDateTimeIcon(kind){
+    const holder=document.createElement('span');
+    holder.className='dd-datetime-icon';
+    holder.setAttribute('aria-hidden','true');
+    const ns='http://www.w3.org/2000/svg';
+    const svg=document.createElementNS(ns,'svg');
+    svg.setAttribute('viewBox','0 0 24 24');
+    svg.setAttribute('fill','none');
+    svg.setAttribute('stroke','currentColor');
+    svg.setAttribute('stroke-width','2');
+    svg.setAttribute('stroke-linecap','round');
+    svg.setAttribute('stroke-linejoin','round');
+    svg.setAttribute('focusable','false');
+    const add=(tag,attrs)=>{
+      const node=document.createElementNS(ns,tag);
+      for(const [name,value] of Object.entries(attrs))node.setAttribute(name,String(value));
+      svg.append(node);
+    };
+    if(kind==='calendar'){
+      add('rect',{x:3,y:4,width:18,height:18,rx:2});
+      add('path',{d:'M16 2v4M8 2v4M3 10h18M8 14h.01'});
+    }else{
+      add('circle',{cx:12,cy:12,r:10});
+      add('path',{d:'M12 6v6l4 2'});
+    }
+    holder.append(svg);
+    return holder;
+  }
+  const dateIcon=createDateTimeIcon('calendar');
   const dateLabel=$('#today');
   dateRow.append(dateIcon,dateLabel);
   const clockRow=document.createElement('div');
   clockRow.className='dd-datetime-clock-row';
-  const clockIcon=document.createElement('span');
-  clockIcon.className='dd-datetime-icon';
-  clockIcon.textContent='◷';
-  clockIcon.setAttribute('aria-hidden','true');
+  const clockIcon=createDateTimeIcon('clock');
   const clockPeriod=document.createElement('span');
   clockPeriod.className='dd-datetime-period';
   const clockValue=document.createElement('time');
