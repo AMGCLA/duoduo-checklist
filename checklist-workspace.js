@@ -65,9 +65,18 @@
   const overviewInfo = document.createElement('aside');
   overviewInfo.className = 'dd-overview-info';
   overviewInfo.setAttribute('aria-label', '重置時間、瀏覽統計與使用說明');
-  for (const selector of ['.reset', '.analytics-row', '.note']) {
+  for (const [selector, cardName, label] of [
+    ['.reset', 'dd-info-reset', '任務重置時間'],
+    ['.analytics-row', 'dd-info-analytics', 'Checklist 瀏覽統計'],
+    ['.note', 'dd-info-help', '使用說明']
+  ]) {
     const node = $(selector);
-    if (node) overviewInfo.append(node);
+    if (!node) continue;
+    const card = document.createElement('section');
+    card.className = 'dd-info-card ' + cardName;
+    card.setAttribute('aria-label', label);
+    card.append(node);
+    overviewInfo.append(card);
   }
   overview.append(overviewLeft, overviewInfo);
   hero.append(overview);
