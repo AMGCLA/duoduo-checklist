@@ -291,8 +291,8 @@ body.dark .category-card .section-head{background:linear-gradient(100deg,color-m
 </style>
 <script data-goatcounter="https://duoduovalley.goatcounter.com/count" data-goatcounter-settings='{"path": "/duoduo-checklist/"}' async src="https://gc.zgo.at/count.js"></script>
 <link rel="stylesheet" href="cursor-ui/cursor.css?v=20261105-scrollglove">
-<link rel="stylesheet" href="checklist-workspace.css?v=20261109-boss-alltiers-1">
-<script defer src="checklist-workspace.js?v=20261109-boss-alltiers-1"></script>
+<link rel="stylesheet" href="checklist-workspace.css?v=20261109-boss-toggle-v2">
+<script defer src="checklist-workspace.js?v=20261109-boss-toggle-v2"></script>
 <script defer src="dd-checklist-traffic-client.js?v=20261109-independent-v1"></script>
 </head>
 <body>
@@ -1384,12 +1384,11 @@ function render(){
       const bossAllBtn=document.createElement("button");
       bossAllBtn.type="button";
       bossAllBtn.className="boss-all-complete-btn";
-      bossAllBtn.textContent=allChecked?"✓ 四階已完成":"☑ 四階全完成";
-      bossAllBtn.title="一次完成初階、中階、高階、終極的每日 BOSS；不影響每週 BOSS";
-      bossAllBtn.setAttribute("aria-label",allChecked?"每日 BOSS 四個階段全部完成":"一次完成每日 BOSS 初階、中階、高階、終極");
-      bossAllBtn.disabled=allChecked;
+      bossAllBtn.textContent=allChecked?"↩ 取消四階完成":"☑ 四階全完成";
+      bossAllBtn.title=allChecked?"取消初階、中階、高階、終極所有每日 BOSS 勾選；不影響每週 BOSS":"一次完成初階、中階、高階、終極的每日 BOSS；不影響每週 BOSS";
+      bossAllBtn.setAttribute("aria-label",allChecked?"取消每日 BOSS 初階、中階、高階、終極的所有勾選":"一次完成每日 BOSS 初階、中階、高階、終極");
       bossAllBtn.onclick=e=>{e.stopPropagation();window.ddChecklistLayout.bulkAllDailyBosses();};
-      head.insertBefore(bossAllBtn,selectAllBtn);
+      head.insertBefore(bossAllBtn,head.querySelector(".category-toggle"));
     }
     selectAllBtn.onclick=(e)=>{e.stopPropagation();if(window.ddChecklistLayout){window.ddChecklistLayout.bulk(card,type);return;}items.forEach(([name,daysText,days],li)=>{const available=!days||days.includes(now.getDay());if(available){const id=taskId(type,name);if(!allChecked&&!store[id])recordAdventureTaskCompletion(type,id);store[id]=!allChecked;}});writeChecklistRecord(storageKey,store);render();};
     const body=document.createElement("div");body.className="items";
