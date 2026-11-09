@@ -44,7 +44,7 @@
   greeting.append($('#today'));
   $('.hero-top').after(greeting);
   greeting.after(controls);
-  $('.brand-heading span').textContent = '冒險任務清單';
+  $('.brand-heading span').textContent = '每日Checklist';
   const tabs = $('.dd-view-tabs');
   tabs.append($('#favoriteFilter'));
   $('#ddFilterSlot').append($('.search-row'));
