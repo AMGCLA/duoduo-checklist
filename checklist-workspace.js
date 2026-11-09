@@ -31,9 +31,127 @@
   controls.classList.add('dd-header-controls');
   controls.setAttribute('role', 'group');
   controls.setAttribute('aria-label', '常用工具與設定');
+  // 90 unique messages; the same Taipei calendar day shows the same phrase for everyone.
+  // This never reads/writes checklist progress, favorites, analytics or local storage.
+  const DD_MOTTO_TAIPEI_OFFSET = 8 * 60 * 60 * 1000;
+  const DD_MOTTO_DAY_MS = 24 * 60 * 60 * 1000;
+  const DD_DAILY_MOTTOS = [
+    "今天，也前進一點。",
+    "把冒險，過成喜歡的樣子。",
+    "小小進步，也值得紀念。",
+    "今天的勇氣，剛剛好。",
+    "慢慢來，也能走很遠。",
+    "每天上線，都有新故事。",
+    "不必完美，也能很精彩。",
+    "帶著期待，繼續出發。",
+    "每次挑戰，都算數。",
+    "好的冒險，不用趕路。",
+    "讓今天，閃閃發亮。",
+    "累積一點，就是一大步。",
+    "再難的 BOSS，也有解法。",
+    "好運，藏在下一次冒險。",
+    "你走的每一步，都有意義。",
+    "先完成一件小事吧。",
+    "一點一滴，也會很厲害。",
+    "今天，也要開心打怪。",
+    "不急，精彩正在路上。",
+    "獎勵不只在終點。",
+    "把快樂，放進今日清單。",
+    "勇敢出發，收穫驚喜。",
+    "小小世界，大大可能。",
+    "你的進度，值得肯定。",
+    "一起冒險，比什麼都好。",
+    "今天，留點時間給自己。",
+    "繼續努力，也記得休息。",
+    "每次掉落，都是驚喜。",
+    "今天，也有值得期待的事。",
+    "把目標，慢慢變成現實。",
+    "路還長，但風景很好。",
+    "完成一項，也很棒。",
+    "在多多谷，遇見新故事。",
+    "今天的冒險，由你決定。",
+    "組隊出發，快樂加倍。",
+    "累了就休息，明天再戰。",
+    "不用比快，走穩就好。",
+    "小小堅持，大大收穫。",
+    "挑戰很難，快樂不難。",
+    "讓今天的清單，輕一點。",
+    "今天，也許會有好掉落。",
+    "下一場冒險，正等著你。",
+    "先打個招呼，再出發。",
+    "每個角色，都有自己的光。",
+    "有隊友的日子，更熱鬧。",
+    "每次突破，都值得開心。",
+    "冒險這件事，慢慢享受。",
+    "今天，又多了一點經驗。",
+    "讓好心情，成為今日 BUFF。",
+    "任務慢慢做，快樂別漏掉。",
+    "把每次登入，變成期待。",
+    "勇敢挑戰，也溫柔生活。",
+    "今天，有新的可能。",
+    "你的故事，還在繼續。",
+    "目標在前方，不必著急。",
+    "走自己的路，打自己的王。",
+    "每天都撿到一點幸福。",
+    "這趟旅程，值得慢慢玩。",
+    "不同的今天，一樣的熱愛。",
+    "一起讓世界，更加熱鬧。",
+    "小小成就，也要慶祝。",
+    "昨天的努力，今天會發光。",
+    "今天，替自己加個 BUFF。",
+    "冒險未完，驚喜也是。",
+    "再靠近目標一點點。",
+    "每一場戰鬥，都有收穫。",
+    "別忘了看看沿途風景。",
+    "今天的運氣，正在暖機。",
+    "享受過程，也是一種勝利。",
+    "有你在，多多谷更熱鬧。",
+    "還有很多故事，等你解鎖。",
+    "小小冒險，也能很難忘。",
+    "進度慢一點，樂趣多一點。",
+    "每天打卡，也有儀式感。",
+    "出發吧，今天的冒險者。",
+    "每個日常，都能有驚喜。",
+    "前進的方向，由你選擇。",
+    "下一個寶箱，或許有驚喜。",
+    "別忘記，開心最重要。",
+    "今天的任務，輕鬆開始。",
+    "新的一天，新的冒險。",
+    "不怕重來，只怕沒出發。",
+    "一起笑著，打贏這一關。",
+    "小小努力，正在累積力量。",
+    "這裡的每一天，都有溫度。",
+    "今天也為自己，加點油。",
+    "好的回憶，都在路上。",
+    "每一點進步，都不白費。",
+    "相信自己的節奏。",
+    "下次登入，還有新篇章。"
+  ];
+  function ddTaipeiMottoDay(timeMs) {
+    return new Date(timeMs + DD_MOTTO_TAIPEI_OFFSET).toISOString().slice(0, 10);
+  }
+  function ddMottoForDay(day) {
+    const days = Math.floor((Date.parse(day + 'T00:00:00Z') - Date.UTC(2026, 10, 9)) / DD_MOTTO_DAY_MS);
+    return DD_DAILY_MOTTOS[((days % DD_DAILY_MOTTOS.length) + DD_DAILY_MOTTOS.length) % DD_DAILY_MOTTOS.length];
+  }
   const greeting = document.createElement('div');
   greeting.className = 'dd-greeting';
-  greeting.innerHTML = '<h2>今天，也前進一點。</h2>';
+  const mottoHeading = document.createElement('h2');
+  greeting.append(mottoHeading);
+  let displayedMottoDay = '';
+  function updateDailyMotto() {
+    const day = ddTaipeiMottoDay(Date.now());
+    if (day === displayedMottoDay) return;
+    mottoHeading.textContent = ddMottoForDay(day);
+    displayedMottoDay = day;
+  }
+  function scheduleNextMotto() {
+    const untilMidnight = DD_MOTTO_DAY_MS - ((Date.now() + DD_MOTTO_TAIPEI_OFFSET) % DD_MOTTO_DAY_MS);
+    setTimeout(() => { updateDailyMotto(); scheduleNextMotto(); }, untilMidnight + 150);
+  }
+  updateDailyMotto();
+  scheduleNextMotto();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) updateDailyMotto(); });
   greeting.append($('#today'));
   $('.hero-top').after(greeting);
   greeting.after(controls);
