@@ -179,6 +179,32 @@ body.dark .adventure-achievement.unlocked .adventure-achievement-state{color:#8d
 .adventure-card.collapsed .adventure-head{margin-bottom:0}
 @media(max-width:560px){.adventure-card{padding:11px}.adventure-content{grid-template-columns:minmax(0,1fr)}.adventure-profile{grid-column:auto;grid-template-columns:minmax(0,1fr)}.adventure-achievements{grid-column:auto}.adventure-achievement-grid{grid-template-columns:minmax(0,1fr)}.adventure-title{font-size:16px}.adventure-event,.adventure-challenge,.adventure-profile,.adventure-achievements{padding:10px}.adventure-achievement-toggle{width:100%}}
 
+/* Decorative official monster lineup; does not change Checklist tasks or data. */
+.dd-checklist-monsters{
+  width:100%;
+  max-width:720px;
+  box-sizing:border-box;
+  margin:24px auto 4px;
+  padding:0 0 5px;
+  border-bottom:1px solid var(--line);
+  pointer-events:none;
+}
+.dd-checklist-monsters img{
+  display:block;
+  width:100%;
+  height:auto;
+  aspect-ratio:1178 / 221;
+  object-fit:contain;
+  object-position:center bottom;
+  border:0;
+  opacity:1;
+  filter:none;
+  transform:none;
+}
+html.dd-checklist-inside-guide .dd-checklist-monsters{display:none!important}
+@media(max-width:560px){
+  .dd-checklist-monsters{margin-top:18px;padding-bottom:3px}
+}
 .note{text-align:center;color:var(--muted);font-size:12px;margin-top:16px;line-height:1.6}
 .guide-btn{border:1px solid #8ab4f8;background:#eef5ff;color:#2563c7;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:.18s}.guide-btn:hover{background:#dceaff;transform:translateY(-1px)}.official-btn{border:1px solid #65b982;background:#effaf2;color:#247744;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:.18s}.official-btn:hover{background:#ddf4e4;transform:translateY(-1px)}.dark .official-btn{background:#20392a;color:#8de0a6;border-color:#3e8054}.dark .official-btn:hover{background:#284a35}.notify-btn{border:1px solid #f2b84b;background:#fff6df;color:#a86400;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:800;cursor:pointer;transition:.18s}.notify-btn:hover{background:#ffedbf;transform:translateY(-1px)}.notify-btn.on{background:#f2a51a;color:#fff;border-color:#f2a51a}.dark .guide-btn{background:#1d2d49;color:#8ab9ff;border-color:#416fa8}.dark .guide-btn:hover{background:#243b60}.dark .notify-btn{background:#3b2d18;color:#ffc966;border-color:#9a6b20}.dark .notify-btn:hover{background:#4a381d}.dark .notify-btn.on{background:#d98d08;color:#fff;border-color:#d98d08}.analytics-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:13px;background:var(--bg);font-size:13px;color:var(--muted)}.analytics-row strong{color:var(--text);font-weight:800}.analytics-sep{opacity:.45}.notify-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(15px);background:var(--card);color:var(--text);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:14px;padding:12px 16px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:9999}.notify-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 @media(max-width:560px){.hero-top{align-items:center}.progress-row{grid-template-columns:1fr}.section-title{font-size:16px}}
@@ -354,6 +380,9 @@ body.dark .category-card .section-head{background:linear-gradient(100deg,color-m
   </div>
   <div class="notify-toast" id="notifyToast"></div>
   <div id="app"></div>
+  <div class="dd-checklist-monsters" aria-hidden="true">
+    <img src="assets/bg_monters.webp" width="1178" height="221" alt="" loading="lazy" decoding="async">
+  </div>
   <div class="note">點擊分類標題即可收起／展開。<br>勾選紀錄儲存在目前裝置的瀏覽器中。</div>
 </div>
 
