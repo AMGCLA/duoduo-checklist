@@ -350,6 +350,7 @@ body.dark .category-card .section-head{background:linear-gradient(100deg,color-m
 
 /* Independent floating BGM iframe; no selectors affect Checklist tasks or cards. */
 #ddChecklistBgmFrame{
+  cursor:url('cursor-ui/cursor-default.png') 2 2,auto;
   position:fixed;z-index:10050;bottom:0;right:0;
   width:112px;height:112px;max-width:100vw;max-height:100dvh;
   border:0;background:transparent;overflow:hidden;
@@ -2195,54 +2196,39 @@ document.addEventListener('visibilitychange',()=>{
       const cursorFile=name=>new URL('cursor-ui/'+name,document.baseURI).href;
       const normal=cursorFile('cursor-default.png');
       const hover=cursorFile('cursor-hover-1.png');
-      const hoverAlt=cursorFile('cursor-hover-2.png');
       const pressed=cursorFile('cursor-pressed.png');
       const style=doc.createElement('style');
       style.id='dd-checklist-player-cursor-style';
-      // Use the official player's existing cursor.js state; do not start a
-      // second hover timer. Also cover the transparent iframe padding.
+      // Chrome can briefly fall back to its system cursor when the embedded
+      // player's two hover images alternate. Keep a stable glove in this
+      // iframe only; leave the official standalone player's animation intact.
       style.textContent=`
         @media (hover:hover) and (pointer:fine){
           html.dd-bgm-checklist-cursor,
           html.dd-bgm-checklist-cursor body,
-          html.dd-bgm-checklist-cursor #player,
-          html.dd-bgm-checklist-cursor #player *,
-          html.dd-bgm-checklist-cursor #mini,
-          html.dd-bgm-checklist-cursor #mini *{
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready body,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready body *{
             cursor:url("${normal}") 2 2,auto!important;
           }
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #player,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #player *,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #mini,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #mini *{
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #player :is(button,a,select,summary,label,[role="button"],[role="option"],[tabindex]:not([tabindex="-1"]),input[type="range"]):hover,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #player :is(button,a,select,summary,label,[role="button"],[role="option"],[tabindex]:not([tabindex="-1"]),input[type="range"]):hover *,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #mini:hover,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #mini:hover *{
             cursor:url("${hover}") 3 2,pointer!important;
           }
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #player,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #player *,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #mini,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #mini *{
-            cursor:url("${hoverAlt}") 3 2,pointer!important;
-          }
-          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #player,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #player *,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #mini,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #mini *{
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #player :is(button,a,select,summary,label,[role="button"],[role="option"],[tabindex]:not([tabindex="-1"]),input[type="range"]):active,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #player :is(button,a,select,summary,label,[role="button"],[role="option"],[tabindex]:not([tabindex="-1"]),input[type="range"]):active *,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #mini:active,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #mini:active *{
             cursor:url("${pressed}") 3 2,grabbing!important;
           }
-          html.dd-bgm-checklist-cursor #player input[type="range"]::-webkit-slider-thumb,
-          html.dd-bgm-checklist-cursor #player input[type="range"]::-moz-range-thumb{
-            cursor:url("${normal}") 2 2,auto!important;
-          }
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #player input[type="range"]::-webkit-slider-thumb,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #player input[type="range"]::-moz-range-thumb{
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #player input[type="range"]::-webkit-slider-thumb,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #player input[type="range"]::-moz-range-thumb{
             cursor:url("${hover}") 3 2,pointer!important;
           }
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #player input[type="range"]::-webkit-slider-thumb,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #player input[type="range"]::-moz-range-thumb{
-            cursor:url("${hoverAlt}") 3 2,pointer!important;
-          }
-          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #player input[type="range"]::-webkit-slider-thumb,
-          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #player input[type="range"]::-moz-range-thumb{
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #player input[type="range"]:active::-webkit-slider-thumb,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-ready #player input[type="range"]:active::-moz-range-thumb{
             cursor:url("${pressed}") 3 2,grabbing!important;
           }
         }`;
