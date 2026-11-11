@@ -207,59 +207,62 @@ html.dd-checklist-inside-guide .dd-checklist-monsters{display:none!important}
 }
 /* Existing note */
 
-/* Checklist footer: isolated presentation only; legacy tasks and toolbar untouched. */
+/* Checklist brand footer: full width aligns with the existing task cards. */
 .dd-checklist-footer{
-  max-width:720px;
-  margin:18px auto 0;
-  padding:20px 18px 10px;
+  width:100%;
+  max-width:1120px;
+  margin:12px auto 0;
+  padding:18px 0 8px;
   box-sizing:border-box;
-  border-top:1px solid var(--line);
-  background:linear-gradient(180deg,rgba(61,123,82,.045),transparent 85%);
+  border:0;
+  background:transparent;
   color:var(--text);
 }
-body.dark .dd-checklist-footer,
-body.dd-workspace.dark .dd-checklist-footer{
-  background:linear-gradient(180deg,rgba(143,197,157,.055),transparent 85%);
+.dd-checklist-footer__upper{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:nowrap;gap:24px;
 }
 .dd-checklist-footer__brand{
-  display:flex;align-items:center;justify-content:center;gap:14px;
-  min-width:0;
+  display:flex;align-items:center;justify-content:flex-start;
+  flex:1 1 auto;min-width:0;gap:15px;
 }
 .dd-checklist-footer__logo{
-  display:block;flex:0 0 auto;width:68px;height:54px;
-  max-width:26%;object-fit:contain;
+  display:block;flex:0 0 auto;
+  width:82px;height:82px;max-width:25%;
+  object-fit:contain;aspect-ratio:1/1;
+  border:0;border-radius:50%;filter:none;
 }
 .dd-checklist-footer__brand-copy{min-width:0}
 .dd-checklist-footer__eyebrow{
-  margin:0 0 3px;
-  font-size:10px;font-weight:800;letter-spacing:.14em;
-  color:var(--accent);
+  margin:0 0 3px;font-size:10px;font-weight:800;
+  letter-spacing:.14em;color:var(--accent);
 }
 .dd-checklist-footer__name{
-  margin:0;
-  font-size:16px;font-weight:800;line-height:1.5;
-  color:var(--text);
+  margin:0;color:var(--text);
+  font-size:17px;font-weight:800;line-height:1.45;
 }
 .dd-checklist-footer__tagline{
-  margin:4px 0 0;font-size:12px;
-  line-height:1.6;color:var(--muted);
+  margin:5px 0 0;font-size:12px;line-height:1.6;
+  color:var(--muted);
 }
 .dd-checklist-footer__motto{
-  margin:16px 0 15px;text-align:center;
-  font-size:12px;line-height:1.65;font-weight:600;
+  flex:0 1 42%;max-width:440px;
+  margin:0;text-align:right;
+  font-size:13px;font-weight:600;line-height:1.65;
   color:var(--muted);
 }
 .dd-checklist-footer__bottom{
   display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:9px 16px;
-  padding-top:12px;border-top:1px solid var(--line);
+  flex-wrap:wrap;gap:8px 18px;
+  margin-top:18px;padding-top:12px;
+  border-top:1px solid var(--line);
 }
 .dd-checklist-footer__copyright{
   color:var(--muted);font-size:11px;line-height:1.5;
 }
 .dd-checklist-footer__links{
   display:flex;align-items:center;justify-content:flex-end;
-  flex-wrap:wrap;gap:3px 12px;
+  flex-wrap:wrap;gap:3px 14px;
 }
 .dd-checklist-footer__links a,
 .dd-checklist-footer__links button{
@@ -276,17 +279,25 @@ body.dd-workspace.dark .dd-checklist-footer{
   outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;
 }
 html.dd-checklist-inside-guide .dd-checklist-footer{display:none!important}
-@media(max-width:560px){
-  .dd-checklist-footer{padding:17px 8px 10px;margin-top:16px}
-  .dd-checklist-footer__brand{gap:10px}
-  .dd-checklist-footer__logo{width:60px;height:48px}
-  .dd-checklist-footer__name{font-size:14px}
-  .dd-checklist-footer__tagline{font-size:11px}
-  .dd-checklist-footer__motto{margin:13px 0;font-size:12px}
-  .dd-checklist-footer__bottom{justify-content:center;gap:3px}
+@media(max-width:680px){
+  .dd-checklist-footer{padding:16px 0 10px}
+  .dd-checklist-footer__upper{flex-wrap:wrap;justify-content:center;gap:12px}
+  .dd-checklist-footer__brand{flex:1 1 100%;justify-content:center}
+  .dd-checklist-footer__logo{width:68px;height:68px}
+  .dd-checklist-footer__motto{
+    flex:1 1 100%;max-width:100%;
+    text-align:center;font-size:12px;
+  }
+  .dd-checklist-footer__bottom{justify-content:center;margin-top:12px}
   .dd-checklist-footer__copyright{width:100%;text-align:center}
   .dd-checklist-footer__links{justify-content:center;gap:4px 14px}
-  .dd-checklist-footer__links a,.dd-checklist-footer__links button{font-size:12px}
+}
+@media(max-width:380px){
+  .dd-checklist-footer__logo{width:58px;height:58px}
+  .dd-checklist-footer__brand{gap:8px}
+  .dd-checklist-footer__eyebrow{font-size:9px}
+  .dd-checklist-footer__name{font-size:14px}
+  .dd-checklist-footer__tagline{font-size:11px}
 }
 .note{text-align:center;color:var(--muted);font-size:12px;margin-top:16px;line-height:1.6}
 .guide-btn{border:1px solid #8ab4f8;background:#eef5ff;color:#2563c7;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:.18s}.guide-btn:hover{background:#dceaff;transform:translateY(-1px)}.official-btn{border:1px solid #65b982;background:#effaf2;color:#247744;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:5px;transition:.18s}.official-btn:hover{background:#ddf4e4;transform:translateY(-1px)}.dark .official-btn{background:#20392a;color:#8de0a6;border-color:#3e8054}.dark .official-btn:hover{background:#284a35}.notify-btn{border:1px solid #f2b84b;background:#fff6df;color:#a86400;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:800;cursor:pointer;transition:.18s}.notify-btn:hover{background:#ffedbf;transform:translateY(-1px)}.notify-btn.on{background:#f2a51a;color:#fff;border-color:#f2a51a}.dark .guide-btn{background:#1d2d49;color:#8ab9ff;border-color:#416fa8}.dark .guide-btn:hover{background:#243b60}.dark .notify-btn{background:#3b2d18;color:#ffc966;border-color:#9a6b20}.dark .notify-btn:hover{background:#4a381d}.dark .notify-btn.on{background:#d98d08;color:#fff;border-color:#d98d08}.analytics-row{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:13px;background:var(--bg);font-size:13px;color:var(--muted)}.analytics-row strong{color:var(--text);font-weight:800}.analytics-sep{opacity:.45}.notify-toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(15px);background:var(--card);color:var(--text);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:14px;padding:12px 16px;font-size:14px;font-weight:700;opacity:0;pointer-events:none;transition:.2s;z-index:9999}.notify-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -468,15 +479,17 @@ body.dark .category-card .section-head{background:linear-gradient(100deg,color-m
   </div>
   <div class="note">點擊分類標題即可收起／展開。<br>勾選紀錄儲存在目前裝置的瀏覽器中。</div>
   <footer class="dd-checklist-footer" aria-label="多多谷 Checklist 頁尾">
-    <div class="dd-checklist-footer__brand">
-      <img class="dd-checklist-footer__logo" src="UI/多多谷Logo.png" alt="" width="68" height="54" loading="lazy" decoding="async">
-      <div class="dd-checklist-footer__brand-copy">
-        <p class="dd-checklist-footer__eyebrow">DUODUO VALLEY · OFFICIAL</p>
-        <p class="dd-checklist-footer__name">DuoDuo Valley｜多多谷</p>
-        <p class="dd-checklist-footer__tagline">一個正在慢慢變熱鬧的小小世界。</p>
+    <div class="dd-checklist-footer__upper">
+      <div class="dd-checklist-footer__brand">
+        <img class="dd-checklist-footer__logo" src="assets/duoduo-footer-round.webp" alt="" width="82" height="82" loading="lazy" decoding="async">
+        <div class="dd-checklist-footer__brand-copy">
+          <p class="dd-checklist-footer__eyebrow">DUODUO VALLEY · OFFICIAL</p>
+          <p class="dd-checklist-footer__name">DuoDuo Valley｜多多谷</p>
+          <p class="dd-checklist-footer__tagline">一個正在慢慢變熱鬧的小小世界。</p>
+        </div>
       </div>
+      <p class="dd-checklist-footer__motto" id="ddChecklistFooterMotto">🍀 每天的小小進步，都是冒險的一部分。</p>
     </div>
-    <p class="dd-checklist-footer__motto" id="ddChecklistFooterMotto">🍀 每天的小小進步，都是冒險的一部分。</p>
     <div class="dd-checklist-footer__bottom">
       <span class="dd-checklist-footer__copyright">© 2026 DuoDuo Valley · 多多谷</span>
       <nav class="dd-checklist-footer__links" aria-label="政策與頁面操作">
