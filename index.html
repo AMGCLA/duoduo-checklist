@@ -2199,61 +2199,54 @@ document.addEventListener('visibilitychange',()=>{
       const pressed=cursorFile('cursor-pressed.png');
       const style=doc.createElement('style');
       style.id='dd-checklist-player-cursor-style';
+      // Use the official player's existing cursor.js state; do not start a
+      // second hover timer. Also cover the transparent iframe padding.
       style.textContent=`
         @media (hover:hover) and (pointer:fine){
+          html.dd-bgm-checklist-cursor,
+          html.dd-bgm-checklist-cursor body,
           html.dd-bgm-checklist-cursor #player,
           html.dd-bgm-checklist-cursor #player *,
           html.dd-bgm-checklist-cursor #mini,
           html.dd-bgm-checklist-cursor #mini *{
             cursor:url("${normal}") 2 2,auto!important;
           }
-          html.dd-bgm-checklist-cursor #player :is(button,a,select,summary,label,[role="button"],[role="option"],[tabindex]:not([tabindex="-1"]),input[type="range"]):hover,
-          html.dd-bgm-checklist-cursor #player :is(button,a,select,summary,label,[role="button"],[role="option"],[tabindex]:not([tabindex="-1"]),input[type="range"]):hover *,
-          html.dd-bgm-checklist-cursor #mini:hover,
-          html.dd-bgm-checklist-cursor #mini:hover *{
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #player,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #player *,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #mini,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #mini *{
             cursor:url("${hover}") 3 2,pointer!important;
           }
-          html.dd-bgm-checklist-cursor.dd-bgm-cursor-alt #player :is(button,a,select,summary,label,[role="button"],[role="option"],[tabindex]:not([tabindex="-1"]),input[type="range"]):hover,
-          html.dd-bgm-checklist-cursor.dd-bgm-cursor-alt #player :is(button,a,select,summary,label,[role="button"],[role="option"],[tabindex]:not([tabindex="-1"]),input[type="range"]):hover *,
-          html.dd-bgm-checklist-cursor.dd-bgm-cursor-alt #mini:hover,
-          html.dd-bgm-checklist-cursor.dd-bgm-cursor-alt #mini:hover *{
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #player,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #player *,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #mini,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #mini *{
             cursor:url("${hoverAlt}") 3 2,pointer!important;
           }
-          html.dd-bgm-checklist-cursor #player :is(button,a,select,summary,label,[role="button"],[role="option"],[tabindex]:not([tabindex="-1"]),input[type="range"]):active,
-          html.dd-bgm-checklist-cursor #player :is(button,a,select,summary,label,[role="button"],[role="option"],[tabindex]:not([tabindex="-1"]),input[type="range"]):active *,
-          html.dd-bgm-checklist-cursor #mini:active,
-          html.dd-bgm-checklist-cursor #mini:active *{
+          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #player,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #player *,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #mini,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #mini *{
             cursor:url("${pressed}") 3 2,grabbing!important;
           }
-          html.dd-bgm-checklist-cursor #player input[type="range"]::-webkit-slider-thumb{cursor:url("${hover}") 3 2,pointer!important;}
-          html.dd-bgm-checklist-cursor.dd-bgm-cursor-alt #player input[type="range"]::-webkit-slider-thumb{cursor:url("${hoverAlt}") 3 2,pointer!important;}
-          html.dd-bgm-checklist-cursor #player input[type="range"]:active::-webkit-slider-thumb{cursor:url("${pressed}") 3 2,grabbing!important;}
-          html.dd-bgm-checklist-cursor #player input[type="range"]::-moz-range-thumb{cursor:url("${hover}") 3 2,pointer!important;}
-          html.dd-bgm-checklist-cursor.dd-bgm-cursor-alt #player input[type="range"]::-moz-range-thumb{cursor:url("${hoverAlt}") 3 2,pointer!important;}
-          html.dd-bgm-checklist-cursor #player input[type="range"]:active::-moz-range-thumb{cursor:url("${pressed}") 3 2,grabbing!important;}
+          html.dd-bgm-checklist-cursor #player input[type="range"]::-webkit-slider-thumb,
+          html.dd-bgm-checklist-cursor #player input[type="range"]::-moz-range-thumb{
+            cursor:url("${normal}") 2 2,auto!important;
+          }
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #player input[type="range"]::-webkit-slider-thumb,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover #player input[type="range"]::-moz-range-thumb{
+            cursor:url("${hover}") 3 2,pointer!important;
+          }
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #player input[type="range"]::-webkit-slider-thumb,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-hover-alt #player input[type="range"]::-moz-range-thumb{
+            cursor:url("${hoverAlt}") 3 2,pointer!important;
+          }
+          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #player input[type="range"]::-webkit-slider-thumb,
+          html.dd-bgm-checklist-cursor.duoduo-cursor-pressed #player input[type="range"]::-moz-range-thumb{
+            cursor:url("${pressed}") 3 2,grabbing!important;
+          }
         }`;
       doc.head.appendChild(style);
-      // The frame owns the alternating state, not the Checklist host page.
-      // A setInterval on its Window keeps changing even when the pointer is
-      // motionless on a slider thumb or nested SVG element.
-      const interactives='button,a,select,summary,label,[role="button"],[role="option"],[tabindex]:not([tabindex="-1"]),input[type="range"]';
-      let over=false,down=false,alternate=false;
-      const paint=()=>{
-        root.classList.toggle('dd-bgm-cursor-alt',over&&!down&&alternate);
-      };
-      const updateTarget=target=>{
-        const interactive=target instanceof doc.defaultView.Element && !!target.closest(interactives);
-        if(interactive!==over){over=interactive;alternate=false;paint();}
-      };
-      doc.addEventListener('pointerover',e=>{if(e.pointerType==='mouse')updateTarget(e.target);},true);
-      doc.addEventListener('pointermove',e=>{if(e.pointerType==='mouse')updateTarget(e.target);},{capture:true,passive:true});
-      doc.addEventListener('pointerout',e=>{
-        if(e.pointerType==='mouse'&&!e.relatedTarget){over=false;down=false;paint();}
-      },true);
-      doc.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button===0){down=true;paint();}},true);
-      doc.addEventListener('pointerup',e=>{if(e.pointerType==='mouse'&&e.button===0){down=false;updateTarget(e.target);paint();}},true);
-      doc.defaultView.addEventListener('blur',()=>{over=false;down=false;paint();});
-      doc.defaultView.setInterval(()=>{if(over&&!down){alternate=!alternate;paint();}},500);
     }catch(error){console.warn('Checklist BGM cursor style unavailable:',error);}
   }
 
